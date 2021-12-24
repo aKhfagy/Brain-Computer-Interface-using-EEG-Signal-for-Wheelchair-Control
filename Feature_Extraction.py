@@ -12,7 +12,8 @@ class Feature_Extraction:
         return
     
     def FFT(self, raw, window_size):
-        return
+        stft = mne.time_frequency.stft(raw.get_data(), wsize=window_size)
+        return stft
     
     def wavelet(self, raw):
         return
