@@ -6,7 +6,7 @@ Created on Fri Dec 24 21:07:13 2021
 """
 import mne
 from Read_Data import Read_Data
-
+from Feature_Extraction import Feature_Extraction
 from Preprocessing import Preprocessing
 
 # use gpu cuda cores
@@ -31,6 +31,10 @@ epochs = preprocessing.get_epochs(raw, raw.ch_names)
 print (preprocessing.scale(raw, epochs))
 
 print (preprocessing.denoise(raw, 1))
+
+feature_extraction = Feature_Extraction()
+
+
 
 # del edf_01_tcp_ar
 
