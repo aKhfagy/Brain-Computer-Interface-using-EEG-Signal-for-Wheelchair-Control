@@ -100,15 +100,3 @@ class Read_Data:
         ret_value = EDF_Data(data, labels, montage)
         return ret_value
     
-# testing
-# print ("testing...")
-# read_data = Read_Data("TUAR/v2.0.0/lists/edf_01_tcp_ar.list", 
-#                       "TUAR/v2.0.0/csv/labels_01_tcp_ar.csv",
-#                       "TUAR/v2.0.0/_DOCS/01_tcp_ar_montage.txt")
-
-# data = read_data.get_data()
-# print (data.data)
-# print (data.labels.head(2))
-# print (data.montage)
-# print (data.LABELS_MAP)
-# del read_data, data
