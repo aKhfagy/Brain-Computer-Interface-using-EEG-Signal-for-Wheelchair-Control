@@ -7,16 +7,18 @@ Created on Tue Dec 14 17:44:23 2021
 
 # import packages
 import mne
+from Read_Data import Read_Data
 
+# use gpu cuda cores
 mne.utils.set_config('MNE_USE_CUDA', 'true')
 mne.cuda.init_cuda(verbose=True)
 
-file = "TUAR/v2.0.0/edf/01_tcp_ar/002/00000254/s005_2010_11_15/00000254_s005_t000.edf"
-raw = mne.io.read_raw_edf(file)
-print (raw)
-print (raw.info)
-print (raw.ch_names)
-raw.plot_psd(fmax=50)
-raw.plot(duration=5, n_channels=36)
+edf_01_tcp_ar = Read_Data("TUAR/v2.0.0/lists/edf_01_tcp_ar.list", 
+                      "TUAR/v2.0.0/csv/labels_01_tcp_ar.csv",
+                      "TUAR/v2.0.0/_DOCS/01_tcp_ar_montage.txt").get_data()
 
-print("end")
+print (edf_01_tcp_ar.data)
+print (edf_01_tcp_ar.labels.head(3))
+print (edf_01_tcp_ar.montage)
+print (edf_01_tcp_ar.LABELS_MAP)
+
