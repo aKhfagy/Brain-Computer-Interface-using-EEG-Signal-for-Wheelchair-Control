@@ -17,26 +17,26 @@ edf_01_tcp_ar = Read_Data("TUAR/v2.0.0/lists/edf_01_tcp_ar.list",
                       "TUAR/v2.0.0/csv/labels_01_tcp_ar.csv",
                       "TUAR/v2.0.0/_DOCS/01_tcp_ar_montage.txt").get_data()
 
-raw, name = edf_01_tcp_ar.data[5]
+raw, name = edf_01_tcp_ar.data[200]
 
-# preprocessing = Preprocessing()
+preprocessing = Preprocessing()
 
-# print (preprocessing.get_time_range_arr(raw, 10, 30))
-# print (preprocessing.get_time_range_raw(raw, 10, 30))
+print (preprocessing.get_time_range_arr(raw, 10, 30))
+print (preprocessing.get_time_range_raw(raw, 10, 30))
 
-# print (preprocessing.get_shape(raw))
+print (preprocessing.get_shape(raw))
 
-# epochs = preprocessing.get_epochs(raw, raw.ch_names)
+epochs = preprocessing.get_epochs(raw, raw.ch_names)
 
-# print (preprocessing.scale(raw, epochs))
+print (preprocessing.scale(raw, epochs))
 
-# print (preprocessing.denoise(raw, 1))
+print (preprocessing.denoise(raw, 1))
 
 feature_extraction = Feature_Extraction()
 
-print (edf_01_tcp_ar.labels.head(2))
+print (feature_extraction.CSP(raw, name, 4))
 
-#print (feature_extraction.FFT(raw, 4))
+print (feature_extraction.FFT(raw, 4))
 
 # del edf_01_tcp_ar
 
