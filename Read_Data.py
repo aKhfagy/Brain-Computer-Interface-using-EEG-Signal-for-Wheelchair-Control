@@ -8,7 +8,7 @@ import mne
 import pandas as pd
 
 class EDF_Data:
-    LABELS_MAP = { 0:'null',
+    LABELS_MAP_NUMBER_NAME = { 0:'null',
                     1:'spsw',
                     2:'gped',
                     3:'pled',
@@ -49,6 +49,48 @@ class EDF_Data:
                     107:'shiv_musc',
                     108:'shiv_elec',
                     109:'musc_elec'}
+    
+    LABELS_MAP_NAME_NUMBER = { 'null':0,
+                    'spsw':1,
+                    'gped':2,
+                    'pled':3,
+                    'eyeb':4,
+                    'artf':5,
+                    'bckg':6,
+                    'seiz':7,
+                    'fnsz':8,
+                    'gnsz':9,
+                    'spsz':10,
+                    'cpsz':11,
+                    'absz':12,
+                    'tnsz':13,
+                    'cnsz':14,
+                    'tcsz':15,
+                    'atsz':16,
+                    'mysz':17,
+                    'nesz':18,
+                    'intr':19,
+                    'slow':20,
+                    'eyem':21,
+                    'chew':22,
+                    'shiv':23,
+                    'musc':14,
+                    'elpp':25,
+                    'elst':26,
+                    'calb':27,
+                    'hphs':28,
+                    'trip':29,
+                    'elec':30,
+                    'eyem_chew':100,
+                    'eyem_shiv':101,
+                    'eyem_musc':102,
+                    'eyem_elec':103,
+                    'chew_shiv':104,
+                    'chew_musc':105,
+                    'chew_elec':106,
+                    'shiv_musc':107,
+                    'shiv_elec':108,
+                    'musc_elec':109}
     def __init__(self, data, labels, montage):
         self.data = data
         self.labels = labels
