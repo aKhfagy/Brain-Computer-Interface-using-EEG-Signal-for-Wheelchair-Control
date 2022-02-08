@@ -6,6 +6,7 @@ Created on Fri Dec 24 21:09:54 2021
 """
 
 import mne
+import pywt
 
 class Feature_Extraction:
     def __init__(self):
@@ -16,8 +17,8 @@ class Feature_Extraction:
         return stft
     
     def wavelet(self, raw):
-        # TODO: implement function
-        return
+        ret = pywt.wavedec(raw, wavelet='db4', level=8)
+        return ret
     
     def CSP(self, raw, name, n_components, 
             reg=None, log=True, norm_trace=False):

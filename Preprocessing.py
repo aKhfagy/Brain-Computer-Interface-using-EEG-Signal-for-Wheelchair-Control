@@ -66,6 +66,10 @@ class Preprocessing:
         
         return epochs_denoised
     
+    def select_ch(self, raw, ch_names=['EEG FP1-REF', 'EEG FP2-REF']):
+        raw = raw.pick_channels(ch_names, ordered=False)
+        return raw
+    
     def filter(self, raw, low_freq=None, high_freq=None):
         filtered_raw = raw.copy().filter(l_freq=low_freq, h_freq=high_freq)
         return filtered_raw
