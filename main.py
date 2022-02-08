@@ -27,8 +27,9 @@ print (raw.ch_names)
 
 # channels to work on: FP1, FP2
 
-# preprocessing = Preprocessing()
-
+preprocessing = Preprocessing()
+raw = preprocessing.select_ch(raw)
+raw.plot()
 # print (preprocessing.get_time_range_arr(raw, 10, 30))
 # print (preprocessing.get_time_range_raw(raw, 10, 30))
 
@@ -40,9 +41,9 @@ print (raw.ch_names)
 
 # print (preprocessing.denoise(raw, 1))
 
-feature_extraction = Feature_Extraction()
+# feature_extraction = Feature_Extraction()
 
-print (feature_extraction.CSP(raw, name, 4))
+# print (feature_extraction.CSP(raw, name, 4))
 
 #print (feature_extraction.FFT(raw, 4))
 
