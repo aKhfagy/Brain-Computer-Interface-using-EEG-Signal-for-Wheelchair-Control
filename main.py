@@ -19,24 +19,32 @@ edf_01_tcp_ar = Read_Data("TUAR/v2.0.0/lists/edf_01_tcp_ar.list",
 
 raw, name = edf_01_tcp_ar.data[200]
 
-preprocessing = Preprocessing()
+print (edf_01_tcp_ar.labels.head())
+print (edf_01_tcp_ar.labels.columns)
+print (edf_01_tcp_ar.labels[[4]].describe())
 
-print (preprocessing.get_time_range_arr(raw, 10, 30))
-print (preprocessing.get_time_range_raw(raw, 10, 30))
+print (raw.ch_names)
 
-print (preprocessing.get_shape(raw))
+# channels to work on: FP1, FP2
 
-epochs = preprocessing.get_epochs(raw, raw.ch_names)
+# preprocessing = Preprocessing()
 
-print (preprocessing.scale(raw, epochs))
+# print (preprocessing.get_time_range_arr(raw, 10, 30))
+# print (preprocessing.get_time_range_raw(raw, 10, 30))
 
-print (preprocessing.denoise(raw, 1))
+# print (preprocessing.get_shape(raw))
+
+# epochs = preprocessing.get_epochs(raw, raw.ch_names)
+
+# print (preprocessing.scale(raw, epochs))
+
+# print (preprocessing.denoise(raw, 1))
 
 feature_extraction = Feature_Extraction()
 
 print (feature_extraction.CSP(raw, name, 4))
 
-print (feature_extraction.FFT(raw, 4))
+#print (feature_extraction.FFT(raw, 4))
 
 # del edf_01_tcp_ar
 
