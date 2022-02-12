@@ -2,6 +2,7 @@ import mne
 from sklearn.model_selection import train_test_split
 import tensorflow as tf
 
+
 class FNN:
     def __init__(self, raw, events, events_id, tmin, tmax):
         self.raw = raw
@@ -26,14 +27,14 @@ class FNN:
             return op
 
     def make_model(self, n_inputs, n_hidden1, n_hidden2, n_outputs, n_iterations=50,
-              n_batches=33, learn_rate=0.00003):
+                   n_batches=33, learn_rate=0.00003):
         X = tf.placeholder(dtype=tf.float32, shape=[None, n_inputs], name='X')
         y = tf.placeholder(dtype=tf.float32, shape=[None], name='y')
         X_train, X_test, y_train, y_test = train_test_split(self.eeg_data,
-                                                            self.labels, test_size = 0.33,
-                                                            random_state = 42)
+                                                            self.labels, test_size=0.33,
+                                                            random_state=42)
 
-        with tf.name_scope("fnn"): # fuzzy function
+        with tf.name_scope("fnn"):  # fuzzy function
             h1 = self.create_layer(X, n_hidden1, layer_name='hl1', activation_fun=tf.nn.relu)
             h2 = self.create_layer(h1, n_hidden2, layer_name='hl2', activation_fun=tf.nn.relu)
             logits = self.create_layer(h2, n_outputs, layer_name='output')
@@ -70,7 +71,7 @@ class FNN:
                 res = res.append({'epoch': iteration_id, 'loss': loss_val[0],
                                   'acc_train': acc_train_val[0]}, ignore_index=True)
                 if iteration_id % 10 == 0:
-                    print (iteration_id, str(round(loss_val[0], 1)), str(round(acc_train_val[0], 3)))
+                    print(iteration_id, str(round(loss_val[0], 1)), str(round(acc_train_val[0], 3)))
 
             all_vars = tf.global_variables()
             saver = tf.train.Saver(all_vars)
