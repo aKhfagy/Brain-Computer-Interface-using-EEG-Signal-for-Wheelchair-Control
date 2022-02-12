@@ -33,7 +33,7 @@ class FNN:
                                                             self.labels, test_size = 0.33,
                                                             random_state = 42)
 
-        with tf.name_scope("myfnn"):
+        with tf.name_scope("fnn"): # fuzzy function
             h1 = self.create_layer(X, n_hidden1, layer_name='hl1', activation_fun=tf.nn.relu)
             h2 = self.create_layer(h1, n_hidden2, layer_name='hl2', activation_fun=tf.nn.relu)
             logits = self.create_layer(h2, n_outputs, layer_name='output')
@@ -57,24 +57,20 @@ class FNN:
             batch_size = int(len(X_train) / n_batches)
             for iteration_id in range(n_iterations):
                 for batch_id in range(n_batches):
-                    i = batch_id * batch_size  # start/end of current batch
+                    i = batch_id * batch_size
                     j = (batch_id + 1) * batch_size
                     xx_train, yy_train = X_train.iloc[i:j, 1:], X_train.iloc[i:j, 0]
 
-                    # train and update parameters from the current batch data
                     sess.run(training_op, feed_dict={X: xx_train, y: yy_train})
 
-                # perform an evaluation at the end of each iteration
                 loss_val = sess.run([loss], feed_dict={X: X_train.iloc[:, 1:], y: X_train.iloc[:, 0]})
-                # evaluate accuracy on train /eval data may reveal any overfitting effect
                 acc_train_val = sess.run([acc],
                                          feed_dict={X: X_train.iloc[:, 1:], y: X_train.iloc[:, 0]})
 
                 res = res.append({'epoch': iteration_id, 'loss': loss_val[0],
                                   'acc_train': acc_train_val[0]}, ignore_index=True)
                 if iteration_id % 10 == 0:
-                    print('{}\t{}\t{}\t{}'.format(iteration_id, str(round(loss_val[0], 1)),
-                                                  str(round(acc_train_val[0], 3))))
+                    print (iteration_id, str(round(loss_val[0], 1)), str(round(acc_train_val[0], 3)))
 
             all_vars = tf.global_variables()
             saver = tf.train.Saver(all_vars)
