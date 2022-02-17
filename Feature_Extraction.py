@@ -17,8 +17,9 @@ class Feature_Extraction:
         return stft
     
     def wavelet(self, raw):
-        ret = pywt.wavedec(raw, wavelet='db4', level=8)
-        return ret
+        wavelet = pywt.Wavelet('bior3.5')
+        phi_d, psi_d, phi_r, psi_r, x = wavelet.wavefun(level=8)
+        return phi_d, psi_d, phi_r, psi_r, x, wavelet
     
     def CSP(self, raw, name, n_components, 
             reg=None, log=True, norm_trace=False):
