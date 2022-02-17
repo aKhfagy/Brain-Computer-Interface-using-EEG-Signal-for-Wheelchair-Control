@@ -1,7 +1,7 @@
 from sklearn.model_selection import train_test_split
 import tensorflow.compat.v1 as tf
 tf.disable_v2_behavior()
-
+from Activation_Function import Activation_Function
 
 class FNN:
     def __init__(self, features, labels):
@@ -30,7 +30,7 @@ class FNN:
 
         with tf.name_scope("fnn"):
             h1 = self.create_layer(X, n_hidden1, layer_name='hl1', activation_fun=tf.nn.relu)
-            h2 = self.create_layer(h1, n_hidden2, layer_name='hl2', activation_fun=tf.nn.relu)
+            h2 = self.create_layer(h1, n_hidden2, layer_name='hl2', activation_fun=Activation_Function.fuzzy)
             logits = self.create_layer(h2, n_outputs, layer_name='output')
 
         with tf.name_scope('loss'):
