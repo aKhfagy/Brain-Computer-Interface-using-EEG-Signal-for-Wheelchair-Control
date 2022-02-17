@@ -1,6 +1,6 @@
-import mne
 from sklearn.model_selection import train_test_split
-import tensorflow as tf
+import tensorflow.compat.v1 as tf
+tf.disable_v2_behavior()
 
 
 class FNN:
@@ -25,7 +25,7 @@ class FNN:
     def make_model(self, n_inputs, n_hidden1, n_hidden2, n_outputs, n_iterations=50,
                    n_batches=33, learn_rate=0.00003):
         X = tf.placeholder(dtype=tf.float32, shape=[None, n_inputs], name='X')
-        y = tf.placeholder(dtype=tf.float32, shape=[None], name='y')
+        y = tf.placeholder(dtype=tf.int32, shape=[None], name='y')
         X_train, X_test, y_train, y_test = train_test_split(self.data,
                                                             self.labels, test_size=0.33,
                                                             random_state=42)
@@ -48,7 +48,8 @@ class FNN:
             acc = tf.reduce_mean(tf.cast(correct, tf.float32))
 
         init = tf.global_variables_initializer()
-
+        
+        
         with tf.Session() as sess:
             sess.run(init)
             batch_size = int(len(X_train) / n_batches)
@@ -56,18 +57,17 @@ class FNN:
                 for batch_id in range(n_batches):
                     i = batch_id * batch_size
                     j = (batch_id + 1) * batch_size
-                    xx_train, yy_train = X_train.iloc[i:j, :], y_train.iloc[i:j, :]
+                    xx_train, yy_train = X_train[i:j], y_train[i:j]
 
                     sess.run(training_op, feed_dict={X: xx_train, y: yy_train})
 
-                loss_val = sess.run([loss], feed_dict={X: X_train.iloc[:, :], y: y_train.iloc[:, :]})
+                loss_val = sess.run([loss], feed_dict={X: X_train, y: y_train})
                 acc_train_val = sess.run([acc],
-                                         feed_dict={X: X_train.iloc[:, :], y: y_train.iloc[:, :]})
-
-                res = res.append({'epoch': iteration_id, 'loss': loss_val[0],
-                                  'acc_train': acc_train_val[0]}, ignore_index=True)
+                                         feed_dict={X: X_train, y: y_train})
                 if iteration_id % 10 == 0:
-                    print(iteration_id, str(round(loss_val[0], 1)), str(round(acc_train_val[0], 3)))
+                    print('iteration id: ', iteration_id, 
+                          ', loss: ', str(round(loss_val[0], 1)), 
+                          ', accuracy: ', str(round(acc_train_val[0], 3)))
 
             all_vars = tf.global_variables()
             saver = tf.train.Saver(all_vars)

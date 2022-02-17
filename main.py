@@ -12,6 +12,7 @@ from Read_Data import Read_Data, EDF_Data
 from Feature_Extraction import Feature_Extraction
 from Preprocessing import Preprocessing
 import numpy as np
+from FNN import FNN
 
 # use gpu cuda cores
 mne.utils.set_config('MNE_USE_CUDA', 'true')
@@ -76,6 +77,7 @@ raw_time = []
 labels = []
 
 for i in range(0, len(raw_ch)):
+    print (i, '/', len(raw_ch))
     if i == 18 or i == 29 or i == 67 or i == 68 or i == 129 or i == 131 or i == 136 or i == 175 or i == 178:
         continue
     elif i == 179 or i == 181 or i == 224:
@@ -96,4 +98,20 @@ for raw in raw_time:
     mean = np.mean(data)
     sd = np.std(data)
     features.append([mean, sd])
+
+del raw_time
+
+n_output = set(labels)
+n_output = len(n_output)
+
+m = {100: 0, 101: 1, 102: 2, 103: 3, 105: 4, 106: 5, 109: 6, 14: 7, 21: 8, 22: 9, 23: 10, 30: 11}
+
+for i in range(0, len(labels)):
+    labels[i] = int(labels[i])
+    labels[i] = m[labels[i]]
+
+print (sys.getsizeof(features), sys.getsizeof(labels))
+
+fuzzy = FNN(features, labels)
+fuzzy.make_model(n_inputs=2, n_hidden1=2, n_hidden2=2, n_outputs=n_output)
 
