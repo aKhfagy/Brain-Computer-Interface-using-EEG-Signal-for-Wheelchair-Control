@@ -7,8 +7,6 @@ class FNN:
     def __init__(self, features, labels):
         self.data = features
         self.labels = labels
-        # self.eeg_epochs = self.epochs.copy().pick_types(eeg=True, meg=False, eog=False)
-        # self.eeg_data = self.eeg_epochs.get_data().reshape(len(self.labels), -1)
         return
 
     def create_layer(self, input_layer, n_neurons, layer_name="", activation_fun=None):
@@ -30,7 +28,7 @@ class FNN:
                                                             self.labels, test_size=0.33,
                                                             random_state=42)
 
-        with tf.name_scope("fnn"):  # fuzzy function
+        with tf.name_scope("fnn"):
             h1 = self.create_layer(X, n_hidden1, layer_name='hl1', activation_fun=tf.nn.relu)
             h2 = self.create_layer(h1, n_hidden2, layer_name='hl2', activation_fun=tf.nn.relu)
             logits = self.create_layer(h2, n_outputs, layer_name='output')

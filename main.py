@@ -101,14 +101,15 @@ for raw in raw_time:
 
 del raw_time
 
-n_output = set(labels)
-n_output = len(n_output)
 
-m = {100: 0, 101: 1, 102: 2, 103: 3, 105: 4, 106: 5, 109: 6, 14: 7, 21: 8, 22: 9, 23: 10, 30: 11}
+m = {14: 0, 21: 1, 22: 2, 23: 3, 30: 4, 100: 1, 101: 1, 102: 1, 103: 1, 105: 1, 106: 1, 109: 1}
 
 for i in range(0, len(labels)):
     labels[i] = int(labels[i])
     labels[i] = m[labels[i]]
+
+n_output = set(labels)
+n_output = len(n_output)
 
 print (sys.getsizeof(features), sys.getsizeof(labels))
 
