@@ -4,15 +4,11 @@ import tensorflow as tf
 
 
 class FNN:
-    def __init__(self, raw, events, events_id, tmin, tmax):
-        self.raw = raw
-        self.events = events
-        self.events_id = events_id
-        self.epochs = mne.Epochs(raw, events, events_id, tmin, tmax,
-                                 proj=True, decim=2, baseline=None, preload=True)
-        self.labels = events[4]
-        self.eeg_epochs = self.epochs.copy().pick_types(eeg=True, meg=False, eog=False)
-        self.eeg_data = self.eeg_epochs.get_data().reshape(len(self.labels), -1)
+    def __init__(self, features, labels):
+        self.data = features
+        self.labels = labels
+        # self.eeg_epochs = self.epochs.copy().pick_types(eeg=True, meg=False, eog=False)
+        # self.eeg_data = self.eeg_epochs.get_data().reshape(len(self.labels), -1)
         return
 
     def create_layer(self, input_layer, n_neurons, layer_name="", activation_fun=None):
@@ -30,7 +26,7 @@ class FNN:
                    n_batches=33, learn_rate=0.00003):
         X = tf.placeholder(dtype=tf.float32, shape=[None, n_inputs], name='X')
         y = tf.placeholder(dtype=tf.float32, shape=[None], name='y')
-        X_train, X_test, y_train, y_test = train_test_split(self.eeg_data,
+        X_train, X_test, y_train, y_test = train_test_split(self.data,
                                                             self.labels, test_size=0.33,
                                                             random_state=42)
 
@@ -60,13 +56,13 @@ class FNN:
                 for batch_id in range(n_batches):
                     i = batch_id * batch_size
                     j = (batch_id + 1) * batch_size
-                    xx_train, yy_train = X_train.iloc[i:j, 1:], X_train.iloc[i:j, 0]
+                    xx_train, yy_train = X_train.iloc[i:j, :], y_train.iloc[i:j, :]
 
                     sess.run(training_op, feed_dict={X: xx_train, y: yy_train})
 
-                loss_val = sess.run([loss], feed_dict={X: X_train.iloc[:, 1:], y: X_train.iloc[:, 0]})
+                loss_val = sess.run([loss], feed_dict={X: X_train.iloc[:, :], y: y_train.iloc[:, :]})
                 acc_train_val = sess.run([acc],
-                                         feed_dict={X: X_train.iloc[:, 1:], y: X_train.iloc[:, 0]})
+                                         feed_dict={X: X_train.iloc[:, :], y: y_train.iloc[:, :]})
 
                 res = res.append({'epoch': iteration_id, 'loss': loss_val[0],
                                   'acc_train': acc_train_val[0]}, ignore_index=True)

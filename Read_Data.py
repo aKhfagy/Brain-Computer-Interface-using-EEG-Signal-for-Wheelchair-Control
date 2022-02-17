@@ -119,7 +119,7 @@ class Read_Data:
             name = striped_path[-22:]
             name = name[:-4]
             # read data from the paths and add it to data object
-            raw = mne.io.read_raw_edf(striped_path)
+            raw = mne.io.read_raw_edf(striped_path, preload=True)
             data.append((raw, name))
             
         del paths_file, paths_edf

@@ -8,9 +8,10 @@ import os
 import sys
 
 import mne
-from Read_Data import Read_Data
+from Read_Data import Read_Data, EDF_Data
 from Feature_Extraction import Feature_Extraction
 from Preprocessing import Preprocessing
+import numpy as np
 
 # use gpu cuda cores
 mne.utils.set_config('MNE_USE_CUDA', 'true')
@@ -81,12 +82,18 @@ for i in range(0, len(raw_ch)):
         continue
     raw = raw_ch[i]
     df = ranges[i]
-    print (i)
     for j in df.index:
         raw_time.append(preprocessing.get_time_range_raw(raw, start_time=df.loc[j, 2], end_time=df.loc[j, 3]))
-        labels.append(df.loc[j, 4])
+        labels.append(EDF_Data.LABELS_MAP_NAME_NUMBER[df.loc[j, 4]])
 
 del raw_ch
 del ranges
 
+features = []
+
+for raw in raw_time:
+    data = raw._data
+    mean = np.mean(data)
+    sd = np.std(data)
+    features.append([mean, sd])
 
