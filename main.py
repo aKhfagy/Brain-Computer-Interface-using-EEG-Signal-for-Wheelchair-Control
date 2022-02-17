@@ -36,7 +36,7 @@ edf_01_tcp_ar.labels = select_ch_df(edf_01_tcp_ar.labels)
 for data in edf_01_tcp_ar.data:
     raw, name = data
     raw = preprocessing.select_ch(raw)
-    ranges = edf_01_tcp_ar.labels[edf_01_tcp_ar.labels[0] == name]
+    ranges.append(edf_01_tcp_ar.labels[edf_01_tcp_ar.labels[0] == name])
     raw_ch.append(raw)
 
 del edf_01_tcp_ar
@@ -71,43 +71,22 @@ for data in edf_03_tcp_ar_a.data:
 
 del edf_03_tcp_ar_a
 
-print (sys.getsizeof(raw_ch), sys.getsizeof(ranges))
+raw_time = []
+labels = []
 
-print (raw_ch)
-print (ranges)
+for i in range(0, len(raw_ch)):
+    if i == 18 or i == 29 or i == 67 or i == 68 or i == 129 or i == 131 or i == 136 or i == 175 or i == 178:
+        continue
+    elif i == 179 or i == 181 or i == 224:
+        continue
+    raw = raw_ch[i]
+    df = ranges[i]
+    print (i)
+    for j in df.index:
+        raw_time.append(preprocessing.get_time_range_raw(raw, start_time=df.loc[j, 2], end_time=df.loc[j, 3]))
+        labels.append(df.loc[j, 4])
 
-for raw in raw_ch:
-    print()
-
-
-# print (preprocessing.get_time_range_arr(raw, 10, 30))
-# print (preprocessing.get_time_range_raw(raw, 10, 30))
-
-# print (preprocessing.get_shape(raw))
-
-# epochs = preprocessing.get_epochs(raw, raw.ch_names)
-
-# print (preprocessing.scale(raw, epochs))
-
-# print (preprocessing.denoise(raw, 1))
-
-# feature_extraction = Feature_Extraction()
-
-# print (feature_extraction.CSP(raw, name, 4))
-
-#print (feature_extraction.FFT(raw, 4))
-
-# del edf_01_tcp_ar
-
-# edf_02_tcp_le = Read_Data("TUAR/v2.0.0/lists/edf_02_tcp_le.list", 
-#                       "TUAR/v2.0.0/csv/labels_02_tcp_le.csv",
-#                       "TUAR/v2.0.0/_DOCS/02_tcp_le_montage.txt").get_data()
-
-# del edf_02_tcp_le
-
-# edf_03_tcp_ar_a = Read_Data("TUAR/v2.0.0/lists/edf_03_tcp_ar_a.list", 
-#                       "TUAR/v2.0.0/csv/labels_03_tcp_ar_a.csv",
-#                       "TUAR/v2.0.0/_DOCS/03_tcp_ar_a_montage.txt").get_data()
+del raw_ch
+del ranges
 
 
-# del edf_03_tcp_ar_a
