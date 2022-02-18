@@ -1,7 +1,6 @@
 from sklearn.model_selection import train_test_split
 import tensorflow.compat.v1 as tf
 tf.disable_v2_behavior()
-from activation_function import Activation_Function
 
 class FNN:
     def __init__(self, features, labels):
@@ -20,7 +19,24 @@ class FNN:
                 op = activation_fun(op)
             return op
 
-    def make_model(self, n_inputs, n_hidden1, n_hidden2, n_outputs, n_iterations=50,
+    def create_fuzzy_layer(self, input_layer_1, input_layer_2, n_neurons, layer_name=""):
+        with tf.name_scope(layer_name):
+            # layer h1
+            n_inputs = int(input_layer_1.get_shape()[1])
+            initial_value = tf.truncated_normal((n_inputs, n_neurons))  # initial value (will updated at each iteration)
+            w = tf.Variable(initial_value, name="weight")  # weight vector, initiazed to initial_value
+            b = tf.Variable(tf.zeros([n_neurons]), name="bias")  # bias vector
+            u = tf.matmul(input_layer_1, w) + b
+            # input layer
+            n_inputs = int(input_layer_2.get_shape()[1])
+            initial_value = tf.truncated_normal((n_inputs, n_neurons))  # initial value (will updated at each iteration)
+            w = tf.Variable(initial_value, name="weight")  # weight vector, initiazed to initial_value
+            b = tf.Variable(tf.zeros([n_neurons]), name="bias")  # bias vector
+            v = tf.matmul(input_layer_2, w) + b
+            op = u * v
+            return op
+
+    def make_model(self, n_inputs, n_hidden, n_outputs, n_iterations=50,
                    n_batches=33, learn_rate=0.00003):
         X = tf.placeholder(dtype=tf.float32, shape=[None, n_inputs], name='X')
         y = tf.placeholder(dtype=tf.int32, shape=[None], name='y')
@@ -29,10 +45,13 @@ class FNN:
                                                             random_state=42)
 
         with tf.name_scope("fnn"):
-            h1 = self.create_layer(X, n_hidden1, layer_name='hl1', activation_fun=tf.nn.relu)
-            #h2 = self.create_layer(h1, n_hidden2, layer_name='hl2', activation_fun=Activation_Function.fuzzy)
-            h2 = self.create_layer(h1, n_hidden2, layer_name='hl2', activation_fun=tf.nn.relu)
-            logits = self.create_layer(h2, n_outputs, layer_name='output')
+            h1 = self.create_layer(X, n_hidden, layer_name='hl1')
+            h2 = self.create_layer(h1, n_hidden, layer_name='hl2', activation_fun=tf.nn.relu)
+            h3 = self.create_layer(h2, n_hidden, layer_name='hl3', activation_fun=tf.nn.relu)
+            h4 = self.create_layer(h3, n_hidden, layer_name='hl4')
+            h5 = self.create_fuzzy_layer(h3, h4, n_hidden, layer_name='hl5')
+            h6 = self.create_layer(h5, n_hidden, layer_name='hl6', activation_fun=tf.nn.softmax)
+            logits = self.create_layer(h6, n_outputs, layer_name='output')
 
         with tf.name_scope('loss'):
             entropy = tf.nn.sparse_softmax_cross_entropy_with_logits(logits=logits, labels=y)
@@ -47,8 +66,7 @@ class FNN:
             acc = tf.reduce_mean(tf.cast(correct, tf.float32))
 
         init = tf.global_variables_initializer()
-        
-        
+
         with tf.Session() as sess:
             sess.run(init)
             batch_size = int(len(X_train) / n_batches)
