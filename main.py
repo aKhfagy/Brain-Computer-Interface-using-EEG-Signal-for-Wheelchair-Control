@@ -95,12 +95,13 @@ features = []
 
 for raw in raw_time:
     data = raw._data
-    mean = np.mean(data)
-    sd = np.std(data)
-    features.append([mean, sd])
+    mean0 = np.mean(data[0])
+    sd0 = np.std(data[0])
+    mean1 = np.mean(data[1])
+    sd1 = np.std(data[1])
+    features.append([mean0, sd0, mean1, sd1])
 
 del raw_time
-
 
 m = {14: 0, 21: 1, 22: 2, 23: 3, 30: 4, 100: 1, 101: 1, 102: 1, 103: 1, 105: 1, 106: 1, 109: 1}
 
@@ -114,5 +115,5 @@ n_output = len(n_output)
 print (sys.getsizeof(features), sys.getsizeof(labels))
 
 fuzzy = FNN(features, labels)
-fuzzy.make_model(n_inputs=2, n_hidden1=2, n_hidden2=2, n_outputs=n_output)
+fuzzy.make_model(n_inputs=4, n_hidden1=4, n_hidden2=4, n_outputs=n_output)
 
