@@ -14,6 +14,6 @@ features, labels, n_output = TUAR2()
 fuzzy = FNN(features, labels)
 fuzzy.make_model(n_inputs=4, n_hidden=4, n_outputs=n_output, n_iterations=100)
 
-knn_pred, knn_error = KNN(features, labels, n_output)
-print (knn_error)
+knn, knn_accuracy, knn_error = KNN(features, labels, n_output)
+print (knn_accuracy, knn_error)
 

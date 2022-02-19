@@ -12,13 +12,15 @@ def KNN(X, y, k):
     predictions = model.predict(X_test)
 
     error = 0
+    percentage = 0
 
     # RMSE
     for i in range(len(predictions)):
         error = error + ((predictions[i] - y_test[i])**2)
-        print (predictions[i], y_test[i])
+        percentage = percentage + (1.0 if predictions[i] == y_test[i] else 0.0)
 
+    percentage = percentage / len(predictions)
     error = np.sqrt(error)
 
-    return predictions, error
+    return model, percentage, error
 
