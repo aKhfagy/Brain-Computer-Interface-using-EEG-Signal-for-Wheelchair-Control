@@ -7,12 +7,25 @@ from Preprocessing import Preprocessing
 import numpy as np
 from Read_Data import Read_Data, EDF_Data
 
-
 def select_ch_df(df):
     return df[df[1].str.contains("FP")]
 
 
-def TUAR2():
+def mean_std_TUARv2(raw_time):
+    features = []
+
+    for raw in raw_time:
+        data = raw._data
+        mean0 = np.mean(data[0])
+        sd0 = np.std(data[0])
+        mean1 = np.mean(data[1])
+        sd1 = np.std(data[1])
+        features.append([mean0, sd0, mean1, sd1])
+
+    return features
+
+
+def TUARv2():
     # use gpu cuda cores
     mne.utils.set_config('MNE_USE_CUDA', 'true')
     mne.cuda.init_cuda(verbose=True)
@@ -84,15 +97,7 @@ def TUAR2():
     del raw_ch
     del ranges
 
-    features = []
-
-    for raw in raw_time:
-        data = raw._data
-        mean0 = np.mean(data[0])
-        sd0 = np.std(data[0])
-        mean1 = np.mean(data[1])
-        sd1 = np.std(data[1])
-        features.append([mean0, sd0, mean1, sd1])
+    features = mean_std_TUARv2(raw_time)
 
     del raw_time
 
@@ -107,5 +112,16 @@ def TUAR2():
 
     print(sys.getsizeof(features), sys.getsizeof(labels))
 
+    np.save('features.tuar/features_mean_std.npy', features)
+    np.save('features.tuar/labels.npy', labels)
+
     return features, labels, n_output
 
+
+def load_processed_features_TUARv2(path_features='features.tuar/features_mean_std.npy'):
+    features = np.load(path_features)
+    labels = np.load('features.tuar/labels.npy')
+    n_output = set(labels)
+    n_output = len(n_output)
+
+    return features, labels, n_output
