@@ -1,14 +1,5 @@
-# -*- coding: utf-8 -*-
-"""
-Created on Tue Dec 14 17:44:23 2021
-
-@author: Ahmed
-"""
-
-# import packages
 import mne
 import numpy as np
-from Read_Data import Read_Data
 
 class Preprocessing:
     def __init__(self):

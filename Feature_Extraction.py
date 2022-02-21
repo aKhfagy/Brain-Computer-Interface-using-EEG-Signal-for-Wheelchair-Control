@@ -1,10 +1,3 @@
-# -*- coding: utf-8 -*-
-"""
-Created on Fri Dec 24 21:09:54 2021
-
-@author: Ahmed
-"""
-
 import mne
 import pywt
 

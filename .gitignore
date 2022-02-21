@@ -4,3 +4,4 @@ __pycache__/
 motor_dataset/
 papers/
 features.tuar/
+checkpoint/

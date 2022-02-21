@@ -1,11 +1,10 @@
 import mne
-import pandas as pd
-import os
 import sys
 from Feature_Extraction import Feature_Extraction
 from Preprocessing import Preprocessing
 import numpy as np
-from Read_Data import Read_Data, EDF_Data
+from read_data_tuarv2 import ReadDataTUARv2, EDFDataTUARv2
+from read_data_motor_imaginary import ReadDataMotorImaginary
 
 def select_ch_df(df):
     return df[df[1].str.contains("FP")]
@@ -31,7 +30,7 @@ def TUARv2():
     mne.cuda.init_cuda(verbose=True)
     # channels to work on: FP1, FP2
 
-    edf_01_tcp_ar = Read_Data("TUAR/v2.0.0/lists/edf_01_tcp_ar.list",
+    edf_01_tcp_ar = ReadDataTUARv2("TUAR/v2.0.0/lists/edf_01_tcp_ar.list",
                               "TUAR/v2.0.0/csv/labels_01_tcp_ar.csv",
                               "TUAR/v2.0.0/_DOCS/01_tcp_ar_montage.txt").get_data()
 
@@ -51,7 +50,7 @@ def TUARv2():
 
     # 'EEG FP1-LE', 'EEG FP2-LE'
 
-    edf_02_tcp_le = Read_Data("TUAR/v2.0.0/lists/edf_02_tcp_le.list",
+    edf_02_tcp_le = ReadDataTUARv2("TUAR/v2.0.0/lists/edf_02_tcp_le.list",
                               "TUAR/v2.0.0/csv/labels_02_tcp_le.csv",
                               "TUAR/v2.0.0/_DOCS/02_tcp_le_montage.txt").get_data()
     edf_02_tcp_le.labels = select_ch_df(edf_02_tcp_le.labels)
@@ -64,7 +63,7 @@ def TUARv2():
 
     del edf_02_tcp_le
 
-    edf_03_tcp_ar_a = Read_Data("TUAR/v2.0.0/lists/edf_03_tcp_ar_a.list",
+    edf_03_tcp_ar_a = ReadDataTUARv2("TUAR/v2.0.0/lists/edf_03_tcp_ar_a.list",
                                 "TUAR/v2.0.0/csv/labels_03_tcp_ar_a.csv",
                                 "TUAR/v2.0.0/_DOCS/03_tcp_ar_a_montage.txt").get_data()
 
@@ -83,7 +82,7 @@ def TUARv2():
     labels = []
 
     for i in range(0, len(raw_ch)):
-        print(i, '/', len(raw_ch))
+        print(i + 1, '/', len(raw_ch))
         if i == 18 or i == 29 or i == 67 or i == 68 or i == 129 or i == 131 or i == 136 or i == 175 or i == 178:
             continue
         elif i == 179 or i == 181 or i == 224:
@@ -92,7 +91,7 @@ def TUARv2():
         df = ranges[i]
         for j in df.index:
             raw_time.append(preprocessing.get_time_range_raw(raw, start_time=df.loc[j, 2], end_time=df.loc[j, 3]))
-            labels.append(EDF_Data.LABELS_MAP_NAME_NUMBER[df.loc[j, 4]])
+            labels.append(EDFDataTUARv2.LABELS_MAP_NAME_NUMBER[df.loc[j, 4]])
 
     del raw_ch
     del ranges
@@ -125,3 +124,72 @@ def load_processed_features_TUARv2(path_features='features.tuar/features_mean_st
     n_output = len(n_output)
 
     return features, labels, n_output
+
+
+def motor_imaginary():
+    data, names = ReadDataMotorImaginary().get_data()
+    markers_f5 = []
+    signals_f5 = []
+    # electrodes by col.
+    # Fp1 Fp2 F3 F4 C3 C4 P3 P4 O1 O2 A1 A2 F7 F8 T3 T4 T5 T6 Fz Cz Pz X3
+    # 5F data
+    for i in range(0, 19):
+        print('Get important arrays from 5F data: ', i + 1, '/', 19)
+        d = data[i]
+        marker = []
+        for m in d['o'][0][0][4]:
+            marker.append(int(m[0]))
+        markers_f5.append(marker)
+        signals_f5.append(d['o'][0][0][5])
+
+    data_f5 = []
+    for i in range(len(signals_f5)):
+        print('Separate channels for 5F data: ', i + 1, '/', len(signals_f5))
+        signal = signals_f5[i]
+        FP1 = []
+        FP2 = []
+        marker = []
+        for j in range(len(signal)):
+            reading = signal[j]
+            fp1 = reading[0]
+            fp2 = reading[1]
+            FP1.append(fp1)
+            FP2.append(fp2)
+            marker.append(markers_f5[i][j])
+        data_f5.append([FP1, FP2, marker])
+    del signals_f5, markers_f5
+    # TODO: segment F5 data
+
+    # general data
+    markers = []
+    signals = []
+    for i in range(22, len(data)):
+        print('Get important arrays from general data: ', i + 1, '/', len(data))
+        d = data[i]
+        marker = []
+        for m in d['o'][0][0][4]:
+            marker.append(int(m[0]))
+        markers.append(marker)
+        signals.append(d['o'][0][0][5])
+    del data
+
+    data = []
+    for i in range(len(signals)):
+        print('Separate channels for general data: ', i + 1, '/', len(signals))
+        signal = signals[i]
+        FP1 = []
+        FP2 = []
+        marker = []
+        for j in range(len(signal)):
+            reading = signal[j]
+            fp1 = reading[0]
+            fp2 = reading[1]
+            FP1.append(fp1)
+            FP2.append(fp2)
+            marker.append(markers[i][j])
+        data.append([FP1, FP2, marker])
+    del signals, markers
+    # TODO: segment data
+
+    return data_f5, data
+
