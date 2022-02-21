@@ -127,7 +127,7 @@ def load_processed_features_TUARv2(path_features='features.tuar/features_mean_st
 
 
 def motor_imaginary():
-    data = ReadDataMotorImaginary().get_data()
+    data, names = ReadDataMotorImaginary().get_data()
     markers = []
     signals = []
     # electrodes by col.
