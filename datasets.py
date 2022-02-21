@@ -4,6 +4,7 @@ from Feature_Extraction import Feature_Extraction
 from Preprocessing import Preprocessing
 import numpy as np
 from read_data_tuarv2 import ReadDataTUARv2, EDFDataTUARv2
+from read_data_motor_imaginary import ReadDataMotorImaginary
 
 def select_ch_df(df):
     return df[df[1].str.contains("FP")]
@@ -81,7 +82,7 @@ def TUARv2():
     labels = []
 
     for i in range(0, len(raw_ch)):
-        print(i, '/', len(raw_ch))
+        print(i + 1, '/', len(raw_ch))
         if i == 18 or i == 29 or i == 67 or i == 68 or i == 129 or i == 131 or i == 136 or i == 175 or i == 178:
             continue
         elif i == 179 or i == 181 or i == 224:
@@ -126,6 +127,19 @@ def load_processed_features_TUARv2(path_features='features.tuar/features_mean_st
 
 
 def motor_imaginary():
-    # TODO: get features and labels from data
-    return
+    data = ReadDataMotorImaginary().get_data()
+    markers = []
+    signals = []
+    # electrodes by col.
+    # Fp1 Fp2 F3 F4 C3 C4 P3 P4 O1 O2 A1 A2 F7 F8 T3 T4 T5 T6 Fz Cz Pz X3
+    for i in range(len(data)):
+        d = data[i]
+        marker = []
+        for m in d['o'][0][0][4]:
+            marker.append(m[0])
+        markers.append(marker)
+        signals.append(d['o'][0][0][5])
+    # TODO: separate data by columns
+    # TODO: Segment data by time frame if it has the same labels
+    return markers, signals
 
