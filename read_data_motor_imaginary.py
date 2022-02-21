@@ -5,9 +5,10 @@ from scipy.io import loadmat
 class ReadDataMotorImaginary:
     def __init__(self):
         self.filenames = next(walk('motor_dataset/'), (None, None, []))[2]
+        self.filenames.sort()
         self.files = []
         for i in range(len(self.filenames)):
-            print (i + 1, '/', len(self.filenames))
+            print('Read Data from files: ', i + 1, '/', len(self.filenames))
             file = loadmat('motor_dataset/' + self.filenames[i])
             self.files.append(file)
         return

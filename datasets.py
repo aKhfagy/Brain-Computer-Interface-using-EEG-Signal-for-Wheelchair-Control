@@ -128,18 +128,59 @@ def load_processed_features_TUARv2(path_features='features.tuar/features_mean_st
 
 def motor_imaginary():
     data, names = ReadDataMotorImaginary().get_data()
-    markers = []
-    signals = []
+    markers_f5 = []
+    signals_f5 = []
     # electrodes by col.
     # Fp1 Fp2 F3 F4 C3 C4 P3 P4 O1 O2 A1 A2 F7 F8 T3 T4 T5 T6 Fz Cz Pz X3
-    for i in range(len(data)):
+    # 5F data
+    for i in range(0, 19):
+        print('Get important arrays from 5F data: ', i + 1, '/', 19)
+        d = data[i]
+        marker = []
+        for m in d['o'][0][0][4]:
+            marker.append(m[0])
+        markers_f5.append(marker)
+        signals_f5.append(d['o'][0][0][5])
+
+    data_f5 = []
+    for i in range(len(signals_f5)):
+        print('Separate channels for 5F data: ', i + 1, '/', len(signals_f5))
+        signal = signals_f5[i]
+        FP1 = []
+        FP2 = []
+        for reading in signal:
+            fp1 = reading[0]
+            fp2 = reading[1]
+            FP1.append(fp1)
+            FP2.append(fp2)
+        data_f5.append([FP1, FP2])
+    del signals_f5
+
+    markers = []
+    signals = []
+    for i in range(22, len(data)):
+        print('Get important arrays from general data: ', i + 1, '/', len(data))
         d = data[i]
         marker = []
         for m in d['o'][0][0][4]:
             marker.append(m[0])
         markers.append(marker)
         signals.append(d['o'][0][0][5])
-    # TODO: separate data by columns
+    del data
+
+    data = []
+    for i in range(len(signals)):
+        print('Separate channels for general data: ', i + 1, '/', len(signals))
+        signal = signals[i]
+        FP1 = []
+        FP2 = []
+        for reading in signal:
+            fp1 = reading[0]
+            fp2 = reading[1]
+            FP1.append(fp1)
+            FP2.append(fp2)
+        data.append([FP1, FP2])
+
     # TODO: Segment data by time frame if it has the same labels
-    return markers, signals
+    return markers, data
 
