@@ -1,11 +1,9 @@
 import mne
-import pandas as pd
-import os
 import sys
 from Feature_Extraction import Feature_Extraction
 from Preprocessing import Preprocessing
 import numpy as np
-from Read_Data import Read_Data, EDF_Data
+from read_data_tuarv2 import Read_Data, EDF_Data
 
 def select_ch_df(df):
     return df[df[1].str.contains("FP")]

@@ -1,10 +1,3 @@
-# -*- coding: utf-8 -*-
-"""
-Created on Fri Dec 24 21:07:13 2021
-
-@author: Ahmed
-"""
-
 from FNN import FNN
 from RandomForest import RF
 from KNN import KNN
