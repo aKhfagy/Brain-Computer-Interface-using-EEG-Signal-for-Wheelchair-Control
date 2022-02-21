@@ -3,7 +3,7 @@ import sys
 from Feature_Extraction import Feature_Extraction
 from Preprocessing import Preprocessing
 import numpy as np
-from read_data_tuarv2 import Read_Data, EDF_Data
+from read_data_tuarv2 import ReadDataTUARv2, EDFDataTUARv2
 
 def select_ch_df(df):
     return df[df[1].str.contains("FP")]
@@ -29,7 +29,7 @@ def TUARv2():
     mne.cuda.init_cuda(verbose=True)
     # channels to work on: FP1, FP2
 
-    edf_01_tcp_ar = Read_Data("TUAR/v2.0.0/lists/edf_01_tcp_ar.list",
+    edf_01_tcp_ar = ReadDataTUARv2("TUAR/v2.0.0/lists/edf_01_tcp_ar.list",
                               "TUAR/v2.0.0/csv/labels_01_tcp_ar.csv",
                               "TUAR/v2.0.0/_DOCS/01_tcp_ar_montage.txt").get_data()
 
@@ -49,7 +49,7 @@ def TUARv2():
 
     # 'EEG FP1-LE', 'EEG FP2-LE'
 
-    edf_02_tcp_le = Read_Data("TUAR/v2.0.0/lists/edf_02_tcp_le.list",
+    edf_02_tcp_le = ReadDataTUARv2("TUAR/v2.0.0/lists/edf_02_tcp_le.list",
                               "TUAR/v2.0.0/csv/labels_02_tcp_le.csv",
                               "TUAR/v2.0.0/_DOCS/02_tcp_le_montage.txt").get_data()
     edf_02_tcp_le.labels = select_ch_df(edf_02_tcp_le.labels)
@@ -62,7 +62,7 @@ def TUARv2():
 
     del edf_02_tcp_le
 
-    edf_03_tcp_ar_a = Read_Data("TUAR/v2.0.0/lists/edf_03_tcp_ar_a.list",
+    edf_03_tcp_ar_a = ReadDataTUARv2("TUAR/v2.0.0/lists/edf_03_tcp_ar_a.list",
                                 "TUAR/v2.0.0/csv/labels_03_tcp_ar_a.csv",
                                 "TUAR/v2.0.0/_DOCS/03_tcp_ar_a_montage.txt").get_data()
 
@@ -90,7 +90,7 @@ def TUARv2():
         df = ranges[i]
         for j in df.index:
             raw_time.append(preprocessing.get_time_range_raw(raw, start_time=df.loc[j, 2], end_time=df.loc[j, 3]))
-            labels.append(EDF_Data.LABELS_MAP_NAME_NUMBER[df.loc[j, 4]])
+            labels.append(EDFDataTUARv2.LABELS_MAP_NAME_NUMBER[df.loc[j, 4]])
 
     del raw_ch
     del ranges
@@ -123,3 +123,9 @@ def load_processed_features_TUARv2(path_features='features.tuar/features_mean_st
     n_output = len(n_output)
 
     return features, labels, n_output
+
+
+def motor_imaginary():
+    # TODO: get features and labels from data
+    return
+

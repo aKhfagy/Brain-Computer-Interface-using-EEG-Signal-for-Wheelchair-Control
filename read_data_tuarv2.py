@@ -1,7 +1,7 @@
 import mne
 import pandas as pd
 
-class EDF_Data:
+class EDFDataTUARv2:
     LABELS_MAP_NUMBER_NAME = { 0:'null',
                     1:'spsw',
                     2:'gped',
@@ -91,7 +91,7 @@ class EDF_Data:
         self.montage = montage
 
 
-class Read_Data:
+class ReadDataTUARv2:
     
     def __init__(self, path_edf, path_labels, path_montage):
         self.path_edf = path_edf
@@ -133,6 +133,6 @@ class Read_Data:
         
         del montage_file
 
-        ret_value = EDF_Data(data, labels, montage)
+        ret_value = EDFDataTUARv2(data, labels, montage)
         return ret_value
     
