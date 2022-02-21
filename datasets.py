@@ -138,7 +138,7 @@ def motor_imaginary():
         d = data[i]
         marker = []
         for m in d['o'][0][0][4]:
-            marker.append(m[0])
+            marker.append(int(m[0]))
         markers_f5.append(marker)
         signals_f5.append(d['o'][0][0][5])
 
@@ -148,14 +148,19 @@ def motor_imaginary():
         signal = signals_f5[i]
         FP1 = []
         FP2 = []
-        for reading in signal:
+        marker = []
+        for j in range(len(signal)):
+            reading = signal[j]
             fp1 = reading[0]
             fp2 = reading[1]
             FP1.append(fp1)
             FP2.append(fp2)
-        data_f5.append([FP1, FP2])
-    del signals_f5
+            marker.append(markers_f5[i][j])
+        data_f5.append([FP1, FP2, marker])
+    del signals_f5, markers_f5
+    # TODO: segment F5 data
 
+    # general data
     markers = []
     signals = []
     for i in range(22, len(data)):
@@ -163,7 +168,7 @@ def motor_imaginary():
         d = data[i]
         marker = []
         for m in d['o'][0][0][4]:
-            marker.append(m[0])
+            marker.append(int(m[0]))
         markers.append(marker)
         signals.append(d['o'][0][0][5])
     del data
@@ -174,13 +179,17 @@ def motor_imaginary():
         signal = signals[i]
         FP1 = []
         FP2 = []
-        for reading in signal:
+        marker = []
+        for j in range(len(signal)):
+            reading = signal[j]
             fp1 = reading[0]
             fp2 = reading[1]
             FP1.append(fp1)
             FP2.append(fp2)
-        data.append([FP1, FP2])
+            marker.append(markers[i][j])
+        data.append([FP1, FP2, marker])
+    del signals, markers
+    # TODO: segment data
 
-    # TODO: Segment data by time frame if it has the same labels
-    return markers, data
+    return data_f5, data
 

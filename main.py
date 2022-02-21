@@ -24,7 +24,7 @@ from datasets import TUARv2, load_processed_features_TUARv2, motor_imaginary
 print('==============================================================================================================')
 print('Motor imaginary Data start')
 
-labels, data = motor_imaginary()
+data_f5, data = motor_imaginary()
 
 print('Motor imaginary Data end')
 print('==============================================================================================================')
