@@ -158,7 +158,6 @@ def motor_imaginary():
             marker.append(markers_f5[i][j])
         data_f5.append([FP1, FP2, marker])
     del signals_f5, markers_f5
-    # TODO: segment F5 data
 
     # general data
     markers = []
@@ -189,7 +188,26 @@ def motor_imaginary():
             marker.append(markers[i][j])
         data.append([FP1, FP2, marker])
     del signals, markers
-    # TODO: segment data
+
+    data_f5 = np.array(data_f5, dtype=object)
+    data = np.array(data, dtype=object)
+    np.save('features.motor_dataset/raw_data_f5.npy', data_f5)
+    print('saved F5 data')
+    np.save('features.motor_dataset/raw_data_general.npy', data)
+    print('saved general data')
 
     return data_f5, data
+
+
+def load_raw_motor_dataset_data():
+    data_f5 = np.load('features.motor_dataset/raw_data_f5.npy', allow_pickle=True)
+    print('loaded F5 data')
+    data = np.load('features.motor_dataset/raw_data_general.npy', allow_pickle=True)
+    print('loaded general data')
+
+    return data_f5, data
+
+
+def segment_motor_data(data):
+    return
 

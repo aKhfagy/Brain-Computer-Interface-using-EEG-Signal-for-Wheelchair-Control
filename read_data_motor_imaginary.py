@@ -12,6 +12,7 @@ class ReadDataMotorImaginary:
             file = loadmat('motor_dataset/' + self.filenames[i])
             self.files.append(file)
         return
+
     def get_data(self):
         return self.files, self.filenames
 

@@ -1,7 +1,7 @@
 from FNN import FNN
 from KNN import KNN
 from RandomForest import RF
-from datasets import TUARv2, load_processed_features_TUARv2, motor_imaginary
+from datasets import TUARv2, load_processed_features_TUARv2, motor_imaginary, load_raw_motor_dataset_data
 
 # print('==============================================================================================================')
 # print('TUARv2 Data start')
@@ -24,7 +24,7 @@ from datasets import TUARv2, load_processed_features_TUARv2, motor_imaginary
 print('==============================================================================================================')
 print('Motor imaginary Data start')
 
-data_f5, data = motor_imaginary()
+data_f5, data = load_raw_motor_dataset_data()
 
 print('Motor imaginary Data end')
 print('==============================================================================================================')
