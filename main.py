@@ -1,41 +1,67 @@
+import numpy as np
+
 from FNN import FNN
 from KNN import KNN
 from RandomForest import RF
 from datasets import TUARv2, load_processed_features_TUARv2, motor_imaginary, load_raw_motor_dataset_data, \
-    segment_motor_data, get_features_motor_dataset, load_features_motor_dataset
+    segment_motor_data, get_features_motor_dataset, load_features_motor_dataset, load_seg_motor_dataset
 
-# print('==============================================================================================================')
-# print('TUARv2 Data start')
-#
-# features, labels, n_output = load_processed_features_TUARv2()
-#
-# fuzzy = FNN(features, labels)
-# fuzzy.make_model(n_inputs=4, n_hidden=4, n_outputs=n_output, n_iterations=100)
-#
-# knn, knn_accuracy, knn_error = KNN(features, labels, n_output)
-# print('KNN\nAccuracy: ', knn_accuracy, ', Error: ', knn_error)
-#
-# rf, rf_accuracy, rf_error = RF(features, labels)
-# print('Random Forest\nAccuracy: ', rf_accuracy, ', Error: ', rf_error)
-#
-# del features, labels, n_output, fuzzy, knn, knn_accuracy, knn_error, rf, rf_accuracy, rf_error
-#
-# print('TUARv2 Data end')
-# print('==============================================================================================================')
+print('==============================================================================================================')
+print('TUARv2 Data start')
+
+features, labels, n_output = load_processed_features_TUARv2()
+
+fuzzy = FNN(features, labels)
+fuzzy.make_model(n_inputs=4, n_hidden=4, n_outputs=n_output, n_iterations=100)
+
+knn, knn_accuracy, knn_error = KNN(features, labels, n_output)
+print('KNN\nAccuracy: ', knn_accuracy, ', Error: ', knn_error)
+
+rf, rf_accuracy, rf_error = RF(features, labels)
+print('Random Forest\nAccuracy: ', rf_accuracy, ', Error: ', rf_error)
+
+del features, labels, n_output, fuzzy, knn, knn_accuracy, knn_error, rf, rf_accuracy, rf_error
+
+print('TUARv2 Data end')
+print('==============================================================================================================')
 print('==============================================================================================================')
 print('Motor imaginary Data start')
 
-data_f5, data = load_raw_motor_dataset_data()
+print('F5 data start')
+features_f5, labels_f5, n_outputs_f5 = load_features_motor_dataset('features.motor_dataset/features_f5_mean_std.npy',
+                                                                   'features.motor_dataset/labels_f5.npy',
+                                                                   'features.motor_dataset/set_f5.npy')
 
-LABELS_F5 = [1, 2, 3, 4, 5]
-MAP_F5 = {1: 0, 2: 1, 3: 2, 4: 3, 5: 4}
-seg_f5 = segment_motor_data(data_f5, LABELS_F5, MAP_F5, path='features.motor_dataset/seg_data_f5.npy')
-del data_f5, LABELS_F5, MAP_F5
+fuzzy = FNN(features_f5, labels_f5)
+fuzzy.make_model(n_inputs=4, n_hidden=4, n_outputs=n_outputs_f5, n_iterations=100)
 
-LABELS_GENERAL = [1, 2, 3, 4, 5, 6]
-MAP_GENERAL = {1: 0, 2: 1, 3: 2, 4: 3, 5: 4, 6: 5}
-seg_gen = segment_motor_data(data, LABELS_GENERAL, MAP_GENERAL, path='features.motor_dataset/seg_data_gen.npy')
-del data, LABELS_GENERAL, MAP_GENERAL
+knn, knn_accuracy, knn_error = KNN(features_f5, labels_f5, n_outputs_f5)
+print('KNN\nAccuracy: ', knn_accuracy, ', Error: ', knn_error)
+
+rf, rf_accuracy, rf_error = RF(features_f5, labels_f5)
+print('Random Forest\nAccuracy: ', rf_accuracy, ', Error: ', rf_error)
+
+del features_f5, labels_f5, n_outputs_f5, fuzzy, knn, knn_accuracy, knn_error, rf, rf_accuracy, rf_error
+print('F5 data end')
+
+print('General data start')
+features_gen, labels_gen, n_outputs_gen = load_features_motor_dataset(
+    'features.motor_dataset/features_gen_mean_std.npy',
+    'features.motor_dataset/labels_gen.npy',
+    'features.motor_dataset/set_gen.npy')
+
+fuzzy = FNN(features_gen, labels_gen)
+fuzzy.make_model(n_inputs=4, n_hidden=4, n_outputs=n_outputs_gen, n_iterations=100)
+
+knn, knn_accuracy, knn_error = KNN(features_gen, labels_gen, n_outputs_gen)
+print('KNN\nAccuracy: ', knn_accuracy, ', Error: ', knn_error)
+
+rf, rf_accuracy, rf_error = RF(features_gen, labels_gen)
+print('Random Forest\nAccuracy: ', rf_accuracy, ', Error: ', rf_error)
+
+del features_gen, labels_gen, n_outputs_gen, fuzzy, knn, knn_accuracy, knn_error, rf, rf_accuracy, rf_error
+print('General data end')
+
 
 print('Motor imaginary Data end')
 print('==============================================================================================================')
