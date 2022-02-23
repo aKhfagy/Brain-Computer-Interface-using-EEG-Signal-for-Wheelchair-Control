@@ -158,7 +158,6 @@ def motor_imaginary():
             marker.append(markers_f5[i][j])
         data_f5.append([FP1, FP2, marker])
     del signals_f5, markers_f5
-    # TODO: segment F5 data
 
     # general data
     markers = []
@@ -189,7 +188,98 @@ def motor_imaginary():
             marker.append(markers[i][j])
         data.append([FP1, FP2, marker])
     del signals, markers
-    # TODO: segment data
+
+    data_f5 = np.array(data_f5, dtype=object)
+    data = np.array(data, dtype=object)
+    np.save('features.motor_dataset/raw_data_f5.npy', data_f5)
+    print('saved F5 data')
+    np.save('features.motor_dataset/raw_data_general.npy', data)
+    print('saved general data')
 
     return data_f5, data
+
+
+def load_raw_motor_dataset_data():
+    data_f5 = np.load('features.motor_dataset/raw_data_f5.npy', allow_pickle=True)
+    print('loaded F5 data')
+    data = np.load('features.motor_dataset/raw_data_general.npy', allow_pickle=True)
+    print('loaded general data')
+
+    return data_f5, data
+
+
+def segment_motor_data(data, labels, mapping, path):
+    print('Making: ', path)
+    seg = []
+    progress = 0
+    for file in data:
+        progress += 1
+        print(progress, '/', len(data))
+        cur = 0
+        temp_fp1 = []
+        temp_fp2 = []
+        fp1, fp2, marker = file[0], file[1], file[2]
+        for i in range(len(fp1)):
+            if cur == 0 and marker[i] not in labels:
+                continue
+            elif cur == 0 and marker[i] in labels:
+                temp_fp1.append(fp1[i])
+                temp_fp2.append(fp2[i])
+                cur = marker[i]
+            elif cur != 0 and marker[i] not in labels:
+                seg.append((temp_fp1, temp_fp2, mapping[cur]))
+                temp_fp1 = []
+                temp_fp2 = []
+                cur = 0
+            elif cur != 0 and marker[i] == cur:
+                temp_fp1.append(fp1[i])
+                temp_fp2.append(fp2[i])
+            elif cur != 0 and marker[i] != cur and marker[i] in labels:
+                seg.append((temp_fp1, temp_fp2, mapping[cur]))
+                temp_fp1 = []
+                temp_fp2 = []
+                temp_fp1.append(fp1[i])
+                temp_fp2.append(fp2[i])
+                cur = marker[i]
+
+        if cur != 0:
+            seg.append((temp_fp1, temp_fp2, mapping[cur]))
+
+    seg = np.array(seg, dtype=object)
+    np.save(path, seg)
+    return seg
+
+
+def load_seg_motor_dataset():
+    seg_f5 = np.load('features.motor_dataset/seg_data_f5.npy', allow_pickle=True)
+    print('loaded segmented F5 data')
+    seg_gen = np.load('features.motor_dataset/seg_data_gen.npy', allow_pickle=True)
+    print('loaded segmented general data')
+    return seg_f5, seg_gen
+
+
+def get_features_motor_dataset(data, set_labels, path_features, path_labels, path_set_labels):
+    features = []
+    labels = []
+    n_output = len(set_labels)
+    for reading in data:
+        fp1, fp2, label = reading[0], reading[1], reading[2]
+        mean1 = np.mean(fp1)
+        std1 = np.std(fp1)
+        mean2 = np.mean(fp2)
+        std2 = np.std(fp2)
+        features.append([mean1, std1, mean2, std2])
+        labels.append(label)
+    np.save(path_features, features)
+    np.save(path_labels, labels)
+    np.save(path_set_labels, set_labels)
+    return features, labels, n_output
+
+
+def load_features_motor_dataset(path_features, path_labels, path_set_labels):
+    features = np.load(path_features)
+    labels = np.load(path_labels)
+    n_output = np.load(path_set_labels)
+    n_output = len(n_output)
+    return features, labels, n_output
 
