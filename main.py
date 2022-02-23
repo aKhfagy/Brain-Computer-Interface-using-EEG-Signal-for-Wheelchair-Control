@@ -29,12 +29,12 @@ data_f5, data = load_raw_motor_dataset_data()
 
 LABELS_F5 = [1, 2, 3, 4, 5]
 MAP_F5 = {1: 0, 2: 1, 3: 2, 4: 3, 5: 4}
-seg_f5 = segment_motor_data(data_f5, LABELS_F5, MAP_F5)
+seg_f5 = segment_motor_data(data_f5, LABELS_F5, MAP_F5, path='features.motor_dataset/seg_data_f5.npy')
 del data_f5, LABELS_F5, MAP_F5
 
 LABELS_GENERAL = [1, 2, 3, 4, 5, 6]
 MAP_GENERAL = {1: 0, 2: 1, 3: 2, 4: 3, 5: 4, 6: 5}
-seg_gen = segment_motor_data(data, LABELS_GENERAL, MAP_GENERAL)
+seg_gen = segment_motor_data(data, LABELS_GENERAL, MAP_GENERAL, path='features.motor_dataset/seg_data_gen.npy')
 del data, LABELS_GENERAL, MAP_GENERAL
 
 print('Motor imaginary Data end')
