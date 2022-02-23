@@ -208,6 +208,24 @@ def load_raw_motor_dataset_data():
     return data_f5, data
 
 
-def segment_motor_data(data):
-    return
+def segment_motor_data(data, labels, mapping):
+    # TODO: segment data
+    seg = None
+    return seg
+
+
+def get_features_motor_dataset(data):
+    # TODO: get features from data and save them
+    features = None
+    labels = None
+    n_output = None
+    return features, labels, n_output
+
+
+def load_features_motor_dataset(path_labels, path_features):
+    # TODO: load preprocessed features
+    features = None
+    labels = None
+    n_output = None
+    return features, labels, n_output
 
