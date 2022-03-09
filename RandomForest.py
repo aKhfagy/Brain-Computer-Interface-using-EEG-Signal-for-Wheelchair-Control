@@ -4,7 +4,7 @@ from sklearn.ensemble import RandomForestClassifier
 
 
 def RF(X, y):
-    model = RandomForestClassifier(n_estimators = 50)
+    model = RandomForestClassifier(n_estimators=900)
     X_train, X_test, y_train, y_test = train_test_split(X,
                                                         y, test_size=0.33,
                                                         random_state=42)
@@ -14,13 +14,10 @@ def RF(X, y):
     error = 0
     percentage = 0
     for i in range(len(predictions)):
-        error = error + ((predictions[i] - y_test[i])**2)
+        error = error + ((predictions[i] - y_test[i]) ** 2)
         percentage = percentage + (1.0 if predictions[i] == y_test[i] else 0.0)
 
     percentage = percentage / len(predictions)
     error = np.sqrt(error)
 
     return model, percentage, error
-
-
-

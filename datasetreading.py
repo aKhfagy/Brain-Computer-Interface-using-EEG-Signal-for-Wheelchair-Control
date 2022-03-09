@@ -277,11 +277,15 @@ def get_features_motor_dataset(data, set_labels, path_features, path_labels, pat
 
 def get_segmented_data(data, set_labels, path_data, path_labels, path_set_labels):
     readings = []
+    CH1 = []
+    CH2 = []
     labels = []
     n_output = len(set_labels)
     for reading in data:
-        readings.append([reading[0], reading[1]])
+        CH1.append(reading[0])
+        CH2.append(reading[1])
         labels.append(reading[2])
+    readings = [CH1, CH2]
 
     print('Making:', path_data)
     np.save(path_data, readings)

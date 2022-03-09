@@ -8,4 +8,5 @@ f5, labels, n_outputs = \
 print('RNN')
 rnn = compile_model(f5.shape[2], f5.shape[1], 'F5_RNN')
 
-del f5, labels, n_outputs, rnn
+
+
