@@ -3,12 +3,6 @@ from keras.optimizers import Adam
 from keras.layers import Input, Reshape, LSTM, Dense, Lambda
 import numpy as np
 
-def save_model(model, name):
-    model_json = model.to_json()
-    with open("checkpoint/" + name + ".json", "w") as json_file:
-        json_file.write(model_json)
-    model.save_weights(name + ".h5")
-
 
 def make_model(Tx, n_a, n_values, reshapor, LSTM_cell, densor):
     X = Input(shape=(Tx, n_values))
@@ -42,16 +36,9 @@ def compile_model(x, y, Tx, n_values, name):
     opt = Adam(lr=0.01, beta_1=0.9, beta_2=0.999, decay=0.01)
 
     model.compile(optimizer=opt, loss='categorical_crossentropy', metrics=['accuracy'])
-    #save_model(model, name)
     m = n_values
     a0 = np.zeros((m, n_a))
-    a0 = a0.tolist()
     c0 = np.zeros((m, n_a))
-    c0 = c0.tolist()
-    model.fit([x, a0, c0], y, epochs=100)
+    model.fit(np.array([x, a0, c0]), y, epochs=100)
     return model
-
-
-def test_model():
-    return
 
