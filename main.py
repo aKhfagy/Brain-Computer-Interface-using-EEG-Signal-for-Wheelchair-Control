@@ -1,14 +1,14 @@
 from FNN import FNN
 from KNN import KNN
 from RandomForest import RF
-from savedfiles import load_processed_features_TUARv2, load_features_motor_dataset, \
-    load_seg_motor_dataset, load_raw_motor_dataset_data
+from savedfiles import load_processed_features_TUARv2, load_features_motor_dataset
 
 print('==============================================================================================================')
 print('TUARv2 Data start')
 
-features, labels, n_output = load_processed_features_TUARv2()
+features, labels, n_output = load_processed_features_TUARv2(path_features='features.tuar/features_mean_std_fp1_fp2.npy')
 
+print('FNN')
 fuzzy = FNN(features, labels)
 fuzzy.make_model(n_inputs=4, n_hidden=4, n_outputs=n_output, n_iterations=100)
 
@@ -26,10 +26,12 @@ print('=========================================================================
 print('Motor imaginary Data start')
 
 print('F5 data start')
-features_f5, labels_f5, n_outputs_f5 = load_features_motor_dataset('features.motor_dataset/features_f5_mean_std.npy',
-                                                                   'features.motor_dataset/labels_f5.npy',
-                                                                   'features.motor_dataset/set_f5.npy')
+features_f5, labels_f5, n_outputs_f5 = load_features_motor_dataset(
+    'features.motor_dataset/seg_data_features_f5_c3_c4.npy',
+    'features.motor_dataset/seg_data_labels_f5_c3_c4.npy',
+    'features.motor_dataset/seg_data_set_labels_f5_c3_c4.npy')
 
+print('FNN')
 fuzzy = FNN(features_f5, labels_f5)
 fuzzy.make_model(n_inputs=4, n_hidden=4, n_outputs=n_outputs_f5, n_iterations=100)
 
@@ -44,10 +46,11 @@ print('F5 data end')
 
 print('General data start')
 features_gen, labels_gen, n_outputs_gen = load_features_motor_dataset(
-    'features.motor_dataset/features_gen_mean_std.npy',
-    'features.motor_dataset/labels_gen.npy',
-    'features.motor_dataset/set_gen.npy')
+    'features.motor_dataset/seg_data_features_gen_c3_c4.npy',
+    'features.motor_dataset/seg_data_labels_gen_c3_c4.npy',
+    'features.motor_dataset/seg_data_set_labels_gen_c3_c4.npy')
 
+print('FNN')
 fuzzy = FNN(features_gen, labels_gen)
 fuzzy.make_model(n_inputs=4, n_hidden=4, n_outputs=n_outputs_gen, n_iterations=100)
 
