@@ -5,17 +5,13 @@ Created on Thu Feb 24 19:59:23 2022
 @author: omnia
 """
 from keras.models import Sequential
-from keras.layers import LSTM, Dense, Dropout, Masking, Embedding
-from tensorflow.keras.models import Sequential
-
-from tensorflow.keras.layers import Dense
-
-from tensorflow.keras.layers import LSTM
-
-from tensorflow.keras.layers import Dropout
-
+from keras.layers import Dense
+from keras.layers import LSTM
+from keras.layers import Dropout
 import numpy as np
 from sklearn.model_selection import train_test_split
+
+
 def RNN(X,y):
     X_train, X_test, y_train, y_test = train_test_split(X,
                                                         y, test_size=0.33,

@@ -1,5 +1,7 @@
 from FNN import FNN
 from KNN import KNN
+from RNN import RNN
+from CNN import CNN
 from RandomForest import RF
 from savedfiles import load_processed_features_TUARv2, load_features_motor_dataset
 
