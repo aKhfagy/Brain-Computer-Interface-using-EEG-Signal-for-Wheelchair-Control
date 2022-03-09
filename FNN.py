@@ -81,7 +81,7 @@ class FNN:
                 loss_val = sess.run([loss], feed_dict={X: X_train, y: y_train})
                 acc_train_val = sess.run([acc],
                                          feed_dict={X: X_train, y: y_train})
-                if (iteration_id + 1) % 10 == 0:
+                if (iteration_id + 1) % 50 == 0 or iteration_id == 0:
                     print('iteration id: ', iteration_id + 1,
                           ', loss: ', str(round(loss_val[0], 1)), 
                           ', accuracy: ', str(round(acc_train_val[0], 3)))

@@ -127,7 +127,7 @@ def TUARv2():
     return features, labels, n_output
 
 
-def motor_imaginary(index=[0, 1]):
+def motor_imaginary(index):
     data, names = ReadDataMotorImaginary().get_data()
     markers_f5 = []
     signals_f5 = []
@@ -219,7 +219,8 @@ def segment_motor_data(data, labels, mapping, path):
                 temp_2.append(ch2[i])
                 cur = marker[i]
             elif cur != 0 and marker[i] not in labels:
-                seg.append((temp_1, temp_2, mapping[cur]))
+                for seg_i in range(0, len(temp_1) - 200, 200):
+                    seg.append((temp_1[seg_i: seg_i + 200], temp_2[seg_i:seg_i+200], mapping[cur]))
                 temp_1 = []
                 temp_2 = []
                 cur = 0
@@ -227,7 +228,8 @@ def segment_motor_data(data, labels, mapping, path):
                 temp_1.append(ch1[i])
                 temp_2.append(ch2[i])
             elif cur != 0 and marker[i] != cur and marker[i] in labels:
-                seg.append((temp_1, temp_2, mapping[cur]))
+                for seg_i in range(0, len(temp_1) - 200, 200):
+                    seg.append((temp_1[seg_i: seg_i + 200], temp_2[seg_i:seg_i+200], mapping[cur]))
                 temp_1 = []
                 temp_2 = []
                 temp_1.append(ch1[i])
@@ -235,7 +237,8 @@ def segment_motor_data(data, labels, mapping, path):
                 cur = marker[i]
 
         if cur != 0:
-            seg.append((temp_1, temp_2, mapping[cur]))
+            for seg_i in range(0, len(temp_1) - 200, 200):
+                seg.append((temp_1[seg_i: seg_i + 200], temp_2[seg_i:seg_i + 200], mapping[cur]))
 
     seg_scaled = []
     for data in seg:
@@ -263,8 +266,32 @@ def get_features_motor_dataset(data, set_labels, path_features, path_labels, pat
         std2 = np.std(ch2)
         features.append([mean1, std1, mean2, std2])
         labels.append(label)
+    print('Making:', path_features)
     np.save(path_features, features)
+    print('Making:', path_labels)
     np.save(path_labels, labels)
+    print('Making:', path_set_labels)
     np.save(path_set_labels, set_labels)
     return features, labels, n_output
 
+
+def get_segmented_data(data, set_labels, path_data, path_labels, path_set_labels):
+    readings = []
+    CH1 = []
+    CH2 = []
+    labels = []
+    n_output = len(set_labels)
+    for reading in data:
+        CH1.append(reading[0])
+        CH2.append(reading[1])
+        labels.append(reading[2])
+    readings = [CH1, CH2]
+
+    print('Making:', path_data)
+    np.save(path_data, readings)
+    print('Making:', path_labels)
+    np.save(path_labels, labels)
+    print('Making:', path_set_labels)
+    np.save(path_set_labels, set_labels)
+
+    return readings, labels, n_output

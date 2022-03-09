@@ -43,3 +43,11 @@ def load_features_motor_dataset(path_features, path_labels, path_set_labels):
     n_output = len(n_output)
     return features, labels, n_output
 
+
+def load_seg_data_deep_motor_dataset(path_data, path_labels, path_set_labels):
+    data = np.load(path_data)
+    labels = np.load(path_labels)
+    n_output = np.load(path_set_labels)
+    n_output = len(n_output)
+    return data, labels, n_output
+
