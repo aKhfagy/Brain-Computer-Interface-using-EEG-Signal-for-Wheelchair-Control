@@ -1,7 +1,7 @@
 from keras.models import Model
-from keras.optimizer_v1 import Adam
+from keras.optimizers import Adam
 from keras.layers import Input, Reshape, LSTM, Dense, Lambda
-
+import numpy as np
 
 def save_model(model, name):
     model_json = model.to_json()
@@ -19,7 +19,7 @@ def make_model(Tx, n_a, n_values, reshapor, LSTM_cell, densor):
 
     outputs = []
     for t in range(Tx):
-        x = Lambda(lambda x: X[:, :, t])(X)
+        x = Lambda(lambda x: X[:, t, :])(X)
         x = reshapor(x)
         a, _, _ = LSTM_cell(x, [a, c])
         out = densor(a)
@@ -29,7 +29,7 @@ def make_model(Tx, n_a, n_values, reshapor, LSTM_cell, densor):
     return model
 
 
-def compile_model(Tx, n_values, name):
+def compile_model(x, y, Tx, n_values, name):
 
     n_a = 64
     reshapor = Reshape((1, n_values))
@@ -42,8 +42,13 @@ def compile_model(Tx, n_values, name):
     opt = Adam(lr=0.01, beta_1=0.9, beta_2=0.999, decay=0.01)
 
     model.compile(optimizer=opt, loss='categorical_crossentropy', metrics=['accuracy'])
-    save_model(model, name)
-
+    #save_model(model, name)
+    m = n_values
+    a0 = np.zeros((m, n_a))
+    a0 = a0.tolist()
+    c0 = np.zeros((m, n_a))
+    c0 = c0.tolist()
+    model.fit([x, a0, c0], y, epochs=100)
     return model
 
 
