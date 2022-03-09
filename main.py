@@ -1,10 +1,8 @@
-import numpy as np
-
 from FNN import FNN
 from KNN import KNN
 from RandomForest import RF
-from datasets import TUARv2, load_processed_features_TUARv2, motor_imaginary, load_raw_motor_dataset_data, \
-    segment_motor_data, get_features_motor_dataset, load_features_motor_dataset, load_seg_motor_dataset
+from savedfiles import load_processed_features_TUARv2, load_features_motor_dataset, \
+    load_seg_motor_dataset, load_raw_motor_dataset_data
 
 print('==============================================================================================================')
 print('TUARv2 Data start')
