@@ -4,7 +4,7 @@ from sklearn.ensemble import RandomForestClassifier
 
 
 def RF(X, y):
-    model = RandomForestClassifier(n_estimators = 100)
+    model = RandomForestClassifier(n_estimators = 50)
     X_train, X_test, y_train, y_test = train_test_split(X,
                                                         y, test_size=0.33,
                                                         random_state=42)

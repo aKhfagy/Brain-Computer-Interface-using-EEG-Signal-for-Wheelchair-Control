@@ -1,13 +1,24 @@
 import mne
 import sys
-from Feature_Extraction import Feature_Extraction
-from Preprocessing import Preprocessing
+from sklearn.preprocessing import scale
 import numpy as np
 from read_data_tuarv2 import ReadDataTUARv2, EDFDataTUARv2
 from read_data_motor_imaginary import ReadDataMotorImaginary
 
+PATH_TUARv2_C3_C4 = 'features.tuar/features_mean_std_c3_c4.npy'
+PATH_TUARv2_FP1_FP2 = 'features.tuar/features_mean_std_fp1_fp2.npy'
 def select_ch_df(df):
     return df[df[1].str.contains("FP")]
+
+
+def select_ch(raw, ch_names):
+    raw = raw.pick_channels(ch_names, ordered=False)
+    return raw
+
+
+def get_time_range_raw(raw, start_time, end_time):
+    raw_select = raw.copy().crop(tmin=start_time, tmax=end_time)
+    return raw_select
 
 
 def mean_std_TUARv2(raw_time):
@@ -25,6 +36,7 @@ def mean_std_TUARv2(raw_time):
 
 
 def TUARv2():
+    path = PATH_TUARv2_FP1_FP2
     # use gpu cuda cores
     mne.utils.set_config('MNE_USE_CUDA', 'true')
     mne.cuda.init_cuda(verbose=True)
@@ -34,15 +46,13 @@ def TUARv2():
                               "TUAR/v2.0.0/csv/labels_01_tcp_ar.csv",
                               "TUAR/v2.0.0/_DOCS/01_tcp_ar_montage.txt").get_data()
 
-    preprocessing = Preprocessing()
-
     raw_ch = []
     ranges = []
     edf_01_tcp_ar.labels = select_ch_df(edf_01_tcp_ar.labels)
     # 'EEG FP1-REF', 'EEG FP2-REF'
     for data in edf_01_tcp_ar.data:
         raw, name = data
-        raw = preprocessing.select_ch(raw)
+        raw = select_ch(raw, ['EEG FP1-REF', 'EEG FP2-REF'])
         ranges.append(edf_01_tcp_ar.labels[edf_01_tcp_ar.labels[0] == name])
         raw_ch.append(raw)
 
@@ -56,7 +66,7 @@ def TUARv2():
     edf_02_tcp_le.labels = select_ch_df(edf_02_tcp_le.labels)
     for data in edf_02_tcp_le.data:
         raw, name = data
-        raw = preprocessing.select_ch(raw, ch_names=['EEG FP1-LE', 'EEG FP2-LE'])
+        raw = select_ch(raw, ['EEG FP1-LE', 'EEG FP2-LE'])
         label = edf_02_tcp_le.labels[edf_02_tcp_le.labels[0] == name]
         raw_ch.append(raw)
         ranges.append(label)
@@ -71,7 +81,7 @@ def TUARv2():
     # 'EEG FP1-REF', 'EEG FP2-REF'
     for data in edf_03_tcp_ar_a.data:
         raw, name = data
-        raw = preprocessing.select_ch(raw)
+        raw = select_ch(raw, ['EEG FP1-REF', 'EEG FP2-REF'])
         label = edf_03_tcp_ar_a.labels[edf_03_tcp_ar_a.labels[0] == name]
         raw_ch.append(raw)
         ranges.append(label)
@@ -90,7 +100,7 @@ def TUARv2():
         raw = raw_ch[i]
         df = ranges[i]
         for j in df.index:
-            raw_time.append(preprocessing.get_time_range_raw(raw, start_time=df.loc[j, 2], end_time=df.loc[j, 3]))
+            raw_time.append(get_time_range_raw(raw, start_time=df.loc[j, 2], end_time=df.loc[j, 3]))
             labels.append(EDFDataTUARv2.LABELS_MAP_NAME_NUMBER[df.loc[j, 4]])
 
     del raw_ch
@@ -111,22 +121,13 @@ def TUARv2():
 
     print(sys.getsizeof(features), sys.getsizeof(labels))
 
-    np.save('features.tuar/features_mean_std.npy', features)
+    np.save(path, features)
     np.save('features.tuar/labels.npy', labels)
 
     return features, labels, n_output
 
 
-def load_processed_features_TUARv2(path_features='features.tuar/features_mean_std.npy'):
-    features = np.load(path_features)
-    labels = np.load('features.tuar/labels.npy')
-    n_output = set(labels)
-    n_output = len(n_output)
-
-    return features, labels, n_output
-
-
-def motor_imaginary():
+def motor_imaginary(index=[0, 1]):
     data, names = ReadDataMotorImaginary().get_data()
     markers_f5 = []
     signals_f5 = []
@@ -146,17 +147,17 @@ def motor_imaginary():
     for i in range(len(signals_f5)):
         print('Separate channels for 5F data: ', i + 1, '/', len(signals_f5))
         signal = signals_f5[i]
-        FP1 = []
-        FP2 = []
+        CH1 = []
+        CH2 = []
         marker = []
         for j in range(len(signal)):
             reading = signal[j]
-            fp1 = reading[0]
-            fp2 = reading[1]
-            FP1.append(fp1)
-            FP2.append(fp2)
+            ch1 = reading[index[0]]
+            ch2 = reading[index[1]]
+            CH1.append(ch1)
+            CH2.append(ch2)
             marker.append(markers_f5[i][j])
-        data_f5.append([FP1, FP2, marker])
+        data_f5.append([CH2, CH2, marker])
     del signals_f5, markers_f5
 
     # general data
@@ -176,34 +177,25 @@ def motor_imaginary():
     for i in range(len(signals)):
         print('Separate channels for general data: ', i + 1, '/', len(signals))
         signal = signals[i]
-        FP1 = []
-        FP2 = []
+        CH1 = []
+        CH2 = []
         marker = []
         for j in range(len(signal)):
             reading = signal[j]
-            fp1 = reading[0]
-            fp2 = reading[1]
-            FP1.append(fp1)
-            FP2.append(fp2)
+            ch1 = reading[index[0]]
+            ch2 = reading[index[1]]
+            CH1.append(ch1)
+            CH2.append(ch2)
             marker.append(markers[i][j])
-        data.append([FP1, FP2, marker])
+        data.append([CH1, CH2, marker])
     del signals, markers
 
     data_f5 = np.array(data_f5, dtype=object)
     data = np.array(data, dtype=object)
-    np.save('features.motor_dataset/raw_data_f5.npy', data_f5)
+    np.save('features.motor_dataset/raw_data_f5_c3_c4.npy', data_f5)
     print('saved F5 data')
-    np.save('features.motor_dataset/raw_data_general.npy', data)
+    np.save('features.motor_dataset/raw_data_general_c3_c4.npy', data)
     print('saved general data')
-
-    return data_f5, data
-
-
-def load_raw_motor_dataset_data():
-    data_f5 = np.load('features.motor_dataset/raw_data_f5.npy', allow_pickle=True)
-    print('loaded F5 data')
-    data = np.load('features.motor_dataset/raw_data_general.npy', allow_pickle=True)
-    print('loaded general data')
 
     return data_f5, data
 
@@ -216,46 +208,47 @@ def segment_motor_data(data, labels, mapping, path):
         progress += 1
         print(progress, '/', len(data))
         cur = 0
-        temp_fp1 = []
-        temp_fp2 = []
-        fp1, fp2, marker = file[0], file[1], file[2]
-        for i in range(len(fp1)):
+        temp_1 = []
+        temp_2 = []
+        ch1, ch2, marker = file[0], file[1], file[2]
+        for i in range(len(ch1)):
             if cur == 0 and marker[i] not in labels:
                 continue
             elif cur == 0 and marker[i] in labels:
-                temp_fp1.append(fp1[i])
-                temp_fp2.append(fp2[i])
+                temp_1.append(ch1[i])
+                temp_2.append(ch2[i])
                 cur = marker[i]
             elif cur != 0 and marker[i] not in labels:
-                seg.append((temp_fp1, temp_fp2, mapping[cur]))
-                temp_fp1 = []
-                temp_fp2 = []
+                seg.append((temp_1, temp_2, mapping[cur]))
+                temp_1 = []
+                temp_2 = []
                 cur = 0
             elif cur != 0 and marker[i] == cur:
-                temp_fp1.append(fp1[i])
-                temp_fp2.append(fp2[i])
+                temp_1.append(ch1[i])
+                temp_2.append(ch2[i])
             elif cur != 0 and marker[i] != cur and marker[i] in labels:
-                seg.append((temp_fp1, temp_fp2, mapping[cur]))
-                temp_fp1 = []
-                temp_fp2 = []
-                temp_fp1.append(fp1[i])
-                temp_fp2.append(fp2[i])
+                seg.append((temp_1, temp_2, mapping[cur]))
+                temp_1 = []
+                temp_2 = []
+                temp_1.append(ch1[i])
+                temp_2.append(ch2[i])
                 cur = marker[i]
 
         if cur != 0:
-            seg.append((temp_fp1, temp_fp2, mapping[cur]))
+            seg.append((temp_1, temp_2, mapping[cur]))
 
-    seg = np.array(seg, dtype=object)
-    np.save(path, seg)
-    return seg
+    seg_scaled = []
+    for data in seg:
+        ch1, ch2, marker = data[0], data[1], data[2]
+        ch1 = scale(ch1)
+        ch2 = scale(ch2)
+        seg_scaled.append((ch1, ch2, marker))
 
+    del seg
 
-def load_seg_motor_dataset():
-    seg_f5 = np.load('features.motor_dataset/seg_data_f5.npy', allow_pickle=True)
-    print('loaded segmented F5 data')
-    seg_gen = np.load('features.motor_dataset/seg_data_gen.npy', allow_pickle=True)
-    print('loaded segmented general data')
-    return seg_f5, seg_gen
+    seg_scaled = np.array(seg_scaled, dtype=object)
+    np.save(path, seg_scaled)
+    return seg_scaled
 
 
 def get_features_motor_dataset(data, set_labels, path_features, path_labels, path_set_labels):
@@ -263,23 +256,15 @@ def get_features_motor_dataset(data, set_labels, path_features, path_labels, pat
     labels = []
     n_output = len(set_labels)
     for reading in data:
-        fp1, fp2, label = reading[0], reading[1], reading[2]
-        mean1 = np.mean(fp1)
-        std1 = np.std(fp1)
-        mean2 = np.mean(fp2)
-        std2 = np.std(fp2)
+        ch1, ch2, label = reading[0], reading[1], reading[2]
+        mean1 = np.mean(ch1)
+        std1 = np.std(ch1)
+        mean2 = np.mean(ch2)
+        std2 = np.std(ch2)
         features.append([mean1, std1, mean2, std2])
         labels.append(label)
     np.save(path_features, features)
     np.save(path_labels, labels)
     np.save(path_set_labels, set_labels)
-    return features, labels, n_output
-
-
-def load_features_motor_dataset(path_features, path_labels, path_set_labels):
-    features = np.load(path_features)
-    labels = np.load(path_labels)
-    n_output = np.load(path_set_labels)
-    n_output = len(n_output)
     return features, labels, n_output
 
