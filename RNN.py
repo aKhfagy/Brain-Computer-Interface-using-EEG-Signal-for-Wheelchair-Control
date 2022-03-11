@@ -36,12 +36,6 @@ def compile_model(x, y, Tx, n_values, name):
     opt = Adam(lr=0.01, beta_1=0.9, beta_2=0.999, decay=0.01)
 
     model.compile(optimizer=opt, loss='categorical_crossentropy', metrics=['accuracy'])
-    print('model.inputs')
-    [print(i.shape, i.dtype) for i in model.inputs]
-    print('model.outputs')
-    [print(o.shape, o.dtype) for o in model.outputs]
-    print('model.layers')
-    [print(l.name, l.input_shape, l.dtype) for l in model.layers]
     m = n_values
     a0 = np.zeros((m, n_a))
     c0 = np.zeros((m, n_a))
