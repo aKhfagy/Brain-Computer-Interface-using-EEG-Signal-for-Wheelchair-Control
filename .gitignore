@@ -6,3 +6,5 @@ papers/
 features.tuar/
 checkpoint/
 features.motor_dataset/
+models.tuar/
+models.cla/

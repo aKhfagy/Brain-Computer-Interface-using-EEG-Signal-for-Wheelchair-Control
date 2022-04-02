@@ -20,7 +20,7 @@ def load_motor_dataset(path=None):
 
 
 def load_features_motor_dataset(path_features, path_labels, path_set_labels):
-    features = np.load(path_features)
+    features = np.load(path_features, allow_pickle=True)
     labels = np.load(path_labels)
     n_output = np.load(path_set_labels)
     n_output = len(n_output)

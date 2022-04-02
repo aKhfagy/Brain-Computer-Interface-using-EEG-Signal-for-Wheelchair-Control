@@ -2,6 +2,7 @@ import mne
 import sys
 from sklearn.preprocessing import StandardScaler
 import numpy as np
+from scipy.stats import skew, kurtosis
 from read_data_tuarv2 import ReadDataTUARv2, EDFDataTUARv2
 from read_data_motor_imaginary import ReadDataMotorImaginary
 
@@ -128,6 +129,7 @@ def TUARv2():
 
 
 def segment_motor_data(data, labels, mapping, path):
+    print('Segmenting for:', path)
     seg = []
     progress = 0
     scaler = StandardScaler()
@@ -148,7 +150,7 @@ def segment_motor_data(data, labels, mapping, path):
                 for seg_i in range(0, len(temp) - 200, 200):
                     x = np.array(temp[seg_i: seg_i + 200])
                     x = x.reshape((1, -1))
-                    seg.append([scaler.fit_transform(x), mapping[cur]])
+                    seg.append([x, mapping[cur]])
                 temp = []
                 cur = 0
             elif cur != 0 and marker[i] == cur:
@@ -157,7 +159,7 @@ def segment_motor_data(data, labels, mapping, path):
                 for seg_i in range(0, len(temp) - 200, 200):
                     x = np.array(temp[seg_i: seg_i + 200])
                     x = x.reshape((1, -1))
-                    seg.append([scaler.fit_transform(x), mapping[cur]])
+                    seg.append([x, mapping[cur]])
                 temp = []
                 temp.append(file[0][i])
                 cur = marker[i] if isinstance(marker[i], int) else marker[i][0]
@@ -166,12 +168,12 @@ def segment_motor_data(data, labels, mapping, path):
             for seg_i in range(0, len(temp) - 200, 200):
                 x = np.array(temp[seg_i: seg_i + 200])
                 x = x.reshape((1, -1))
-                seg.append([scaler.fit_transform(x), mapping[cur]])
+                seg.append([x, mapping[cur]])
 
-    print('Saving: ', path)
+    print('Saving:', path)
     seg = np.array(seg, dtype=object)
     np.save(path, seg)
-    print('Saved: ', path)
+    print('Saved:', path)
 
     return seg
 
@@ -185,15 +187,17 @@ def motor_imaginary():
     #  0   1   2  3  4  5  6  7  8  9 10 11 12 13 14 15 16 17 18 19 20 21
     c4 = 4
     for i in range(0, len(data)):
-        print('Get data and markers: ', i + 1, '/', 19)
+        print('Get data and markers:', i + 1, '/', 19)
         d = data[i]
-        markers.append(d['o'][0][0][5 if i < 3 else 4])
-        signals.append(d['o'][0][0][6 if i < 3 else 5])
+        markers.append(d['o'][0][0][4])
+        signals.append(d['o'][0][0][5])
     del data
-
-    data_f5 = []
+    subjects = ['A', 'B', 'C', 'D', 'E', 'F']
+    data_f5 = {}
+    for subject in subjects:
+        data_f5[subject] = []
     for i in range(len(signals)):
-        print('Separating channels: ', i + 1, '/', len(signals))
+        print('Separating channels:', i + 1, '/', len(signals))
         signal = signals[i]
         ch = []
         marker = []
@@ -201,36 +205,38 @@ def motor_imaginary():
             reading = signal[j]
             ch.append(reading[c4])
             marker.append(markers[i][j])
-        data_f5.append([ch, marker])
+        data_f5[names[i][10]].append([ch, marker])
     del signals, markers
     index = [1, 2, 3, 4, 5, 6, 91, 92, 99]
     mapping = {1: 0, 2: 1, 3: 2, 4: 3, 5: 4, 6: 5, 91: 6, 92: 7, 99: 8}
-    path = 'features.motor_dataset/raw_data.npy'
-    # print('Saving: ', path)
-    # data_f5 = np.array(data_f5, dtype=object)
-    # np.save(path, data_f5)
-    # print('Saved: ', path)
+    path = 'features.motor_dataset/raw_data_by_subject.npy'
+    print('Saving:', path)
+    data = np.array(data_f5, dtype=object)
+    np.save(path, data)
+    print('Saved:', path)
+    del data
     print('Segmenting data each second (200 readings)')
-    seg_f5 = segment_motor_data(data_f5, index, mapping, 'features.motor_dataset/seg_data.npy')
-
+    seg_f5 = {}
+    for subject in subjects:
+        seg_f5[subject] = segment_motor_data(data_f5[subject], index, mapping,
+                                             'features.motor_dataset/seg_data' + subject + '.npy')
+    del data_f5
     return seg_f5
 
 
 def get_features_motor_dataset(data, set_labels, path_features, path_labels, path_set_labels):
-    print('Processing for: ', path_features)
+    print('Processing for:', path_features)
     features = []
     labels = []
     n_output = len(set_labels)
     for reading in data:
-        l = len(reading)
-        label = reading[l - 1]
-        temp = []
-        for i in range(l - 1):
-            mean = np.mean(reading[i])
-            std = np.std(reading[i])
-            temp.append(mean)
-            temp.append(std)
-        features.append(temp)
+        label = reading[1]
+        current = reading[0]
+        mean = np.mean(current)
+        std = np.std(current)
+        median = np.median(current)
+        variance = np.var(current)
+        features.append([mean, median, variance, std])
         labels.append(label)
     print('Making:', path_features)
     np.save(path_features, features)
