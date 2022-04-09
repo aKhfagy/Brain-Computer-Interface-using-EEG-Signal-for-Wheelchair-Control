@@ -74,7 +74,7 @@ inflection==0.5.1
 intel-openmp==2021.4.0
 intervaltree==3.1.0
 ipykernel==6.4.1
-ipython==7.29.0
+ipython==7.31.1
 ipython_genutils==0.2.0
 isort==5.9.3
 itsdangerous==2.1.2
