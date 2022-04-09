@@ -183,7 +183,7 @@ def motor_imaginary():
     #  0   1   2  3  4  5  6  7  8  9 10 11 12 13 14 15 16 17 18 19 20 21
     c4 = 4
     for i in range(0, len(data)):
-        print('Get data and markers:', i + 1, '/', 19)
+        print('Get data and markers:', i + 1, '/', len(data))
         d = data[i]
         markers.append(d['o'][0][0][4])
         signals.append(d['o'][0][0][5])
