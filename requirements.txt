@@ -1,5 +1,4 @@
 absl-py==1.0.0
-alabaster @ file:///home/ktietz/src/ci/alabaster_1611921544520/work
 antropy==0.1.4
 appdirs @ file:///home/conda/feedstock_root/build_artifacts/appdirs_1603108395799/work
 apptools @ file:///home/conda/feedstock_root/build_artifacts/apptools_1610582543268/work
