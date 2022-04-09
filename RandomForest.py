@@ -3,7 +3,7 @@ import numpy as np
 from sklearn.ensemble import RandomForestClassifier
 
 
-def RF(X, y):
+def rf(x, y):
     l = len(y)
     n_trees = None
     if l <= 10**3:
@@ -13,11 +13,9 @@ def RF(X, y):
     else:
         n_trees = 900
     model = RandomForestClassifier(n_estimators=n_trees)
-    X_train, X_test, y_train, y_test = train_test_split(X,
-                                                        y, test_size=0.33,
-                                                        random_state=42)
-    model.fit(X_train, y_train)
-    predictions = model.predict(X_test)
+    x_train, x_test, y_train, y_test = train_test_split(x, y, test_size=0.33, random_state=42)
+    model.fit(x_train, y_train)
+    predictions = model.predict(x_test)
 
     error = 0
     percentage = 0

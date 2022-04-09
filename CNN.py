@@ -13,10 +13,8 @@ from keras.utils import np_utils
 import numpy as np
 
 
-def CNN(X, y, n_outputs):
-    X_train, X_test, y_train, y_test = train_test_split(X,
-                                                        y, test_size=0.20,
-                                                        random_state=42)
+def cnn(x, y, n_outputs):
+    X_train, X_test, y_train, y_test = train_test_split(x, y, test_size=0.20, random_state=42)
     final = len(X_train)
     final = int(final)
     no_col = 200
