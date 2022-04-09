@@ -232,5 +232,5 @@ traits==6.3.2
 traitsui==7.2.0
 typed-ast==1.4.3
 typing_extensions==4.0.1
-ujson==4.0.2
+ujson==5.1.0
 unidecode==1.2.0
