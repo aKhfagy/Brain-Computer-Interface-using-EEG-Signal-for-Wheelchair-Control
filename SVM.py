@@ -1,21 +1,15 @@
-# -*- coding: utf-8 -*-
-"""
-Created on Tue Feb 22 03:13:47 2022
-
-@author: omnia
-"""
-
 import numpy as np
 from sklearn.model_selection import train_test_split
-def SVM(X,y):
-    X_train, X_test, y_train, y_test = train_test_split(X,
-                                                        y, test_size=0.33,
-                                                        random_state=42)
-    from sklearn import svm
+from sklearn.svm import SVC
 
-    clf = svm.SVC(kernel='linear') 
-    clf.fit(X_train, y_train)
-    predictions = clf.predict(X_test)
+
+def svm(x, y):
+
+    x_train, x_test, y_train, y_test = train_test_split(x, y, test_size=0.33, random_state=42)
+
+    clf = SVC(kernel='rbf')
+    clf.fit(x_train, y_train)
+    predictions = clf.predict(x_test)
     error = 0
     percentage = 0
     for i in range(len(predictions)):
@@ -25,3 +19,4 @@ def SVM(X,y):
     percentage = percentage / len(predictions)
     error = np.sqrt(error)
     return clf, percentage, error
+

@@ -5,6 +5,7 @@ import antropy as ant
 import pywt
 from read_data_tuarv2 import ReadDataTUARv2, EDFDataTUARv2
 from read_data_motor_imaginary import ReadDataMotorImaginary
+from sklearn import preprocessing
 
 PATH_TUARv2_C3_C4 = 'features.tuar/features_mean_std_c3_c4.npy'
 PATH_TUARv2_FP1_FP2 = 'features.tuar/features_mean_std_fp1_fp2.npy'
@@ -128,9 +129,50 @@ def TUARv2():
     return features, labels, n_output
 
 
+def motor_imaginary():
+    data, names = ReadDataMotorImaginary().get_data()
+    markers = []
+    signals = []
+    # electrodes by col.
+    # Fp1 Fp2 F3 F4 C3 C4 P3 P4 O1 O2 A1 A2 F7 F8 T3 T4 T5 T6 Fz Cz Pz X5
+    #  0   1   2  3  4  5  6  7  8  9 10 11 12 13 14 15 16 17 18 19 20 21
+    c4 = 4
+    for i in range(0, len(data)):
+        print('Get data and markers:', i + 1, '/', len(data))
+        d = data[i]
+        markers.append(d['o'][0][0][4])
+        signals.append(d['o'][0][0][5])
+    del data
+    subjects = ['A', 'B', 'C', 'D', 'E', 'F']
+    subj = {}
+    for i in range(len(subjects)):
+        subj[subjects[i]] = i
+    data = {}
+    for subject in subjects:
+        data[subj[subject]] = []
+    for i in range(len(signals)):
+        print('Separating channels:', i + 1, '/', len(signals))
+        signal = signals[i]
+        ch = []
+        marker = []
+        for j in range(len(signal)):
+            reading = signal[j]
+            ch.append(reading[c4])
+            marker.append(markers[i][j])
+        data[subj[names[i][10]]].append([ch, marker])
+    del signals, markers
+    index = [1, 2, 3, 4, 5, 6, 91, 92, 99]
+    mapping = {1: 0, 2: 1, 3: 2, 4: 3, 5: 4, 6: 5, 91: 6, 92: 7, 99: 8}
+    print('Segmenting data each second (200 readings)')
+    for subject in subjects:
+        segment_motor_data(data[subj[subject]], index, mapping, subject)
+    del data
+
+
 def segment_motor_data(data, labels, mapping, subject):
     print('Segmenting for subject:', subject)
-    seg = []
+    data_seg = []
+    markers = []
     progress = 0
     for file in data:
         progress += 1
@@ -148,7 +190,8 @@ def segment_motor_data(data, labels, mapping, subject):
             elif cur != 0 and marker[i] not in labels:
                 for seg_i in range(0, len(temp) - 200, 200):
                     x = temp[seg_i: seg_i + 200]
-                    seg.append([x, mapping[cur]])
+                    data_seg.append(x)
+                    markers.append(mapping[cur])
                 temp = []
                 cur = 0
             elif cur != 0 and marker[i] == cur:
@@ -156,7 +199,8 @@ def segment_motor_data(data, labels, mapping, subject):
             elif cur != 0 and marker[i] != cur and marker[i] in labels:
                 for seg_i in range(0, len(temp) - 200, 200):
                     x = temp[seg_i: seg_i + 200]
-                    seg.append([x, mapping[cur]])
+                    data_seg.append(x)
+                    markers.append(mapping[cur])
                 temp = []
                 temp.append(file[0][i])
                 cur = marker[i] if isinstance(marker[i], int) else marker[i][0]
@@ -164,63 +208,21 @@ def segment_motor_data(data, labels, mapping, subject):
         if cur != 0:
             for seg_i in range(0, len(temp) - 200, 200):
                 x = temp[seg_i: seg_i + 200]
-                seg.append([x, mapping[cur]])
+                data_seg.append(x)
+                markers.append(mapping[cur])
 
-    get_features_motor_dataset(seg, set_labels=labels,
+    get_features_motor_dataset(data_seg, markers, set_labels=labels,
                                path_features='features.motor_dataset/data_features' + subject + '.npy',
                                path_labels='features.motor_dataset/data_labels' + subject + '.npy',
                                path_set_labels='features.motor_dataset/data_set_labels' + subject + '.npy')
 
-    wavelet_processing(seg, path_data='features.motor_dataset/data_wavelet' + subject + '.npy')
+    wavelet_processing(data_seg, markers, path_data='features.motor_dataset/data_wavelet' + subject + '.npy')
 
 
-def motor_imaginary():
-    data, names = ReadDataMotorImaginary().get_data()
-    markers = []
-    signals = []
-    # electrodes by col.
-    # Fp1 Fp2 F3 F4 C3 C4 P3 P4 O1 O2 A1 A2 F7 F8 T3 T4 T5 T6 Fz Cz Pz X5
-    #  0   1   2  3  4  5  6  7  8  9 10 11 12 13 14 15 16 17 18 19 20 21
-    c4 = 4
-    for i in range(0, len(data)):
-        print('Get data and markers:', i + 1, '/', 19)
-        d = data[i]
-        markers.append(d['o'][0][0][4])
-        signals.append(d['o'][0][0][5])
-    del data
-    subjects = ['A', 'B', 'C', 'D', 'E', 'F']
-    subj = {}
-    for i in range(len(subjects)):
-        subj[subjects[i]] = i
-    data_f5 = {}
-    for subject in subjects:
-        data_f5[subj[subject]] = []
-    for i in range(len(signals)):
-        print('Separating channels:', i + 1, '/', len(signals))
-        signal = signals[i]
-        ch = []
-        marker = []
-        for j in range(len(signal)):
-            reading = signal[j]
-            ch.append(reading[c4])
-            marker.append(markers[i][j])
-        data_f5[subj[names[i][10]]].append([ch, marker])
-    del signals, markers
-    index = [1, 2, 3, 4, 5, 6, 91, 92, 99]
-    mapping = {1: 0, 2: 1, 3: 2, 4: 3, 5: 4, 6: 5, 91: 6, 92: 7, 99: 8}
-    print('Segmenting data each second (200 readings)')
-    for subject in subjects:
-        segment_motor_data(data_f5[subj[subject]], index, mapping, subject)
-    del data_f5
-
-
-def get_features_motor_dataset(data, set_labels, path_features, path_labels, path_set_labels):
+def get_features_motor_dataset(data, markers, set_labels, path_features, path_labels, path_set_labels):
     print('Processing for:', path_features)
     features = []
-    labels = []
-    for reading in data:
-        label = reading[1]
-        wave = reading[0]
+    for wave in data:
         mean = np.mean(wave)
         std = np.std(wave)
         median = np.median(wave)
@@ -229,22 +231,20 @@ def get_features_motor_dataset(data, set_labels, path_features, path_labels, pat
         hjorth = ant.hjorth_params(wave)
         katz = ant.katz_fd(wave)
         features.append([mean, median, variance, std, entropy, hjorth[0], hjorth[1], katz])
-        labels.append(label)
     print('Making:', path_features)
     np.save(path_features, features)
     print('Making:', path_labels)
-    np.save(path_labels, labels)
+    np.save(path_labels, markers)
     print('Making:', path_set_labels)
     np.save(path_set_labels, set_labels)
 
 
-def wavelet_processing(data, path_data):
+def wavelet_processing(data, markers, path_data):
     print('Making:', path_data)
     w = pywt.Wavelet('db1')
     levels = pywt.dwt_max_level(data_len=200, filter_len=w.dec_len)
     wavelet = []
-    for reading in data:
-        wave = reading[0]
+    for wave in data:
         coefficient = pywt.wavedec(wave, 'db1', level=levels)
         wavelet.append(coefficient)
 
