@@ -177,9 +177,6 @@ pytz==2021.3
 pyvista==0.32.1
 pyvistaqt==0.5.0
 pywavelets==1.1.1
-pywin32-ctypes==0.2.0
-pywin32==228
-pywinpty==0.5.7
 pyyaml==6.0
 pyzmq==22.3.0
 qdarkstyle==3.0.2
@@ -200,7 +197,6 @@ scooby==0.5.9
 send2trash==1.8.0
 setuptools==59.4.0
 six==1.16.0
-sklearn==0.0
 snowballstemmer==2.2.0
 sortedcontainers==2.4.0
 sphinx==4.2.0
