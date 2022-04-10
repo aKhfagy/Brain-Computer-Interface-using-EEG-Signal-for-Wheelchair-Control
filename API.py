@@ -3,7 +3,7 @@ from flask import Flask, jsonify, request
 from joblib import load
 import traceback
 from datasetreading import motor_imaginary
-from APIHelperFunctions import choose_model_by_name
+from APIHelperFunctions import choose_model_by_name, get_data, rmse
 
 app = Flask(__name__)
 
@@ -17,6 +17,7 @@ def home():
         'Predict': {
             'Models': MODELS,
             'Subjects': SUBJECTS,
+            'Description': 'returns predictions for certain subject using the selected model on input data',
             'Steps': ['1. Write subject name then a hyphen and then the model name to choose model. Ex: A-KNN',
                       '2. Write data path after that. Ex: test-data',
                       '3. Final path should look like Ex: /predict?model=A-KNN&data=data_featuresA']
@@ -24,9 +25,22 @@ def home():
         'Make Models': {
             'Models': MODELS,
             'Subjects': SUBJECTS,
+            'Description': 'Makes selected model for certain subject',
             'Steps': ['1. Write model name as \'model\' attribute',
                       '2. Write subject name as \'subject\' attribute',
                       '3. Final path should look like Ex: /make_models?model=KNN&subject=A']
+        },
+        'View Model': {
+            'Models': MODELS,
+            'Subjects': SUBJECTS,
+            'Description': 'Views selected model accuracy and loss on subject data (whole)',
+            'Steps': ['1. Write model name as \'model\' attribute',
+                      '2. Write subject name as \'subject\' attribute',
+                      '3. Final path should look like Ex: /view_model?model=KNN&subject=A']
+        },
+        'Preprocessing': {
+            'Description': 'Makes features for training',
+            'Steps': 'path must be /preprocessing'
         }
     })
 
@@ -57,10 +71,15 @@ def predict():
         return jsonify({'trace': traceback.format_exc()})
 
 
-@app.route('/make_models')
-def make_models():
+@app.route('/make_model')
+def make_model():
     subject = request.args.get('subject', default=None, type=str)
     model_name = request.args.get('model', default=None, type=str)
+
+    if subject is None or model_name is None:
+        return jsonify({
+            'Error': 'Please enter a valid path with all the attributes'
+        })
 
     return choose_model_by_name(model_name, subject)
 
@@ -73,6 +92,31 @@ def preprocessing():
         'Finished preprocessing': 'Made features for CLA data',
         'Models': MODELS,
         'Subjects': SUBJECTS
+    })
+
+
+@app.route('/view_model')
+def view_model():
+    subject = request.args.get('subject', default=None, type=str)
+    model_name = request.args.get('model', default=None, type=str)
+
+    if subject is None or model_name is None or subject not in SUBJECTS or model_name not in MODELS:
+        return jsonify({
+            'Error': 'Please enter a valid path with all the attributes'
+        })
+
+    x, y, _ = get_data(subject)
+
+    model = load('models.cla/' + subject + '-' + model_name + '.joblib')
+
+    y_hat = model.predict(x)
+
+    percentage, loss = rmse(y_hat, y)
+
+    return jsonify({
+        'Model': model_name,
+        'Accuracy': percentage,
+        'Loss': loss
     })
 
 
