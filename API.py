@@ -2,18 +2,32 @@ import numpy as np
 from flask import Flask, jsonify, request
 from joblib import load
 import traceback
+from datasetreading import motor_imaginary
+from APIHelperFunctions import choose_model_by_name
 
 app = Flask(__name__)
+
+MODELS = ['KNN', 'RF', 'MLP', 'SVM']
+SUBJECTS = ['A', 'B', 'C', 'D', 'E', 'F']
 
 
 @app.route("/")
 def home():
     return jsonify({
-        'Models': ['KNN', 'RF', 'MLP', 'SVM'],
-        'Subjects': ['A', 'B', 'C', 'D', 'E', 'F'],
-        'Steps': ['1. Write subject name then a hyphen and then the model name to choose model. Ex: A-KNN',
-                  '2. Write data path after that. Ex: test-data',
-                  '3. Final path should look like Ex: /predict?model=A-KNN&data=data_featuresA']
+        'Predict': {
+            'Models': MODELS,
+            'Subjects': SUBJECTS,
+            'Steps': ['1. Write subject name then a hyphen and then the model name to choose model. Ex: A-KNN',
+                      '2. Write data path after that. Ex: test-data',
+                      '3. Final path should look like Ex: /predict?model=A-KNN&data=data_featuresA']
+        },
+        'Make Models': {
+            'Models': MODELS,
+            'Subjects': SUBJECTS,
+            'Steps': ['1. Write model name as \'model\' attribute',
+                      '2. Write subject name as \'subject\' attribute',
+                      '3. Final path should look like Ex: /make_models?model=KNN&subject=A']
+        }
     })
 
 
@@ -41,6 +55,25 @@ def predict():
     except:
 
         return jsonify({'trace': traceback.format_exc()})
+
+
+@app.route('/make_models')
+def make_models():
+    subject = request.args.get('subject', default=None, type=str)
+    model_name = request.args.get('model', default=None, type=str)
+
+    return choose_model_by_name(model_name, subject)
+
+
+@app.route('/preprocessing')
+def preprocessing():
+    motor_imaginary()
+
+    return jsonify({
+        'Finished preprocessing': 'Made features for CLA data',
+        'Models': MODELS,
+        'Subjects': SUBJECTS
+    })
 
 
 if __name__ == '__main__':
