@@ -8,3 +8,4 @@ checkpoint/
 features.motor_dataset/
 models.tuar/
 models.cla/
+*.log
