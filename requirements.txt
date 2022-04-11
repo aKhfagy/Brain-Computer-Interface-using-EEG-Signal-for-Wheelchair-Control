@@ -40,3 +40,5 @@ textdistance==4.2.1
 tf-estimator-nightly==2.9.0.dev2021122509
 tf-nightly-gpu==2.9.0.dev20211225
 joblib~=1.1.0
+gunicorn
+requests
