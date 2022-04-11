@@ -122,5 +122,15 @@ def view_model():
     })
 
 
+@app.route('/direct_chair')
+def direct_chair():
+    prediction = request.args.get('prediction', default=None, type=str)
+
+    if prediction is None:
+        return jsonify({
+            'Error': 'Please enter a valid path with all the attributes'
+        })
+
+
 if __name__ == '__main__':
     app.run()
