@@ -6,6 +6,8 @@ import pywt
 from read_data_tuarv2 import ReadDataTUARv2, EDFDataTUARv2
 from read_data_motor_imaginary import ReadDataMotorImaginary
 from sklearn import preprocessing
+from Smooth import smooth
+from scipy.signal import savgol_filter
 
 PATH_TUARv2_C3_C4 = 'features.tuar/features_mean_std_c3_c4.npy'
 PATH_TUARv2_FP1_FP2 = 'features.tuar/features_mean_std_fp1_fp2.npy'
@@ -189,7 +191,8 @@ def segment_motor_data(data, labels, mapping, subject):
                 cur = marker[i] if isinstance(marker[i], int) else marker[i][0]
             elif cur != 0 and marker[i] not in labels:
                 for seg_i in range(0, len(temp) - 200, 200):
-                    x = temp[seg_i: seg_i + 200]
+                    x = np.array(temp[seg_i: seg_i + 200])
+                    x = smooth(x)
                     data_seg.append(x)
                     markers.append(mapping[cur])
                 temp = []
@@ -198,7 +201,8 @@ def segment_motor_data(data, labels, mapping, subject):
                 temp.append(file[0][i])
             elif cur != 0 and marker[i] != cur and marker[i] in labels:
                 for seg_i in range(0, len(temp) - 200, 200):
-                    x = temp[seg_i: seg_i + 200]
+                    x = np.array(temp[seg_i: seg_i + 200])
+                    x = smooth(x)
                     data_seg.append(x)
                     markers.append(mapping[cur])
                 temp = []
@@ -207,7 +211,8 @@ def segment_motor_data(data, labels, mapping, subject):
 
         if cur != 0:
             for seg_i in range(0, len(temp) - 200, 200):
-                x = temp[seg_i: seg_i + 200]
+                x = np.array(temp[seg_i: seg_i + 200])
+                x = smooth(x)
                 data_seg.append(x)
                 markers.append(mapping[cur])
 
@@ -228,9 +233,9 @@ def get_features_motor_dataset(data, markers, set_labels, path_features, path_la
         median = np.median(wave)
         variance = np.var(wave)
         entropy = ant.svd_entropy(wave, normalize=True)
-        hjorth = ant.hjorth_params(wave)
+        mobility, complexity = ant.hjorth_params(wave)
         katz = ant.katz_fd(wave)
-        features.append([mean, median, variance, std, entropy, hjorth[0], hjorth[1], katz])
+        features.append([mean, median, variance, std, entropy, mobility, complexity, katz])
     print('Making:', path_features)
     np.save(path_features, features)
     print('Making:', path_labels)
