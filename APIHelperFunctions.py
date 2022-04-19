@@ -12,8 +12,6 @@ def choose_model_by_name(model_name, subject):
     features, labels, n_outputs = load_features_motor_dataset('features.motor_dataset/data_features'
                                                               + subject + '.npy',
                                                               'features.motor_dataset/data_labels'
-                                                              + subject + '.npy',
-                                                              'features.motor_dataset/data_set_labels'
                                                               + subject + '.npy')
     if model_name == 'KNN':
         model, accuracy, error = knn(features, labels, n_outputs)
@@ -61,8 +59,6 @@ def get_data(subject):
     features, labels, n_outputs = load_features_motor_dataset('features.motor_dataset/data_features'
                                                               + subject + '.npy',
                                                               'features.motor_dataset/data_labels'
-                                                              + subject + '.npy',
-                                                              'features.motor_dataset/data_set_labels'
                                                               + subject + '.npy')
     return features, labels, n_outputs
 

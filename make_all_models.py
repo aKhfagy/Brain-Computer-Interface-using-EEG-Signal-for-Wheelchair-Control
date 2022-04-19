@@ -40,8 +40,6 @@ for subject in subjects:
     features, labels, n_outputs = load_features_motor_dataset('features.motor_dataset/data_features'
                                                               + subject + '.npy',
                                                               'features.motor_dataset/data_labels'
-                                                              + subject + '.npy',
-                                                              'features.motor_dataset/data_set_labels'
                                                               + subject + '.npy')
     model, accuracy, error = knn(features, labels, n_outputs)
     dump(model, 'models.cla/' + subject + '-KNN.joblib')

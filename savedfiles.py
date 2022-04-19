@@ -19,18 +19,16 @@ def load_motor_dataset(path=None):
     return seg
 
 
-def load_features_motor_dataset(path_features, path_labels, path_set_labels):
+def load_features_motor_dataset(path_features, path_labels):
     features = np.load(path_features, allow_pickle=True)
     labels = np.load(path_labels)
-    n_output = np.load(path_set_labels)
-    n_output = len(n_output)
+    n_output = len(set(labels))
     return features, labels, n_output
 
 
-def load_seg_data_deep_motor_dataset(path_data, path_labels, path_set_labels):
+def load_seg_data_deep_motor_dataset(path_data, path_labels):
     data = np.load(path_data)
     labels = np.load(path_labels)
-    n_output = np.load(path_set_labels)
-    n_output = len(n_output)
+    n_output = len(set(labels))
     return data, labels, n_output
 
