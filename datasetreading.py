@@ -250,19 +250,17 @@ def renyi_entropy(alpha, X):
 def get_features_motor_dataset(data, markers, path_features, path_labels):
     print('Processing for:', path_features)
     features = []
-    idx = 0
     for wave in data:
         mean = np.mean(wave)
         std = np.std(wave)
         median = np.median(wave)
         variance = np.var(wave)
-        entropy = renyi_entropy(2, wave)
+        #entropy = renyi_entropy(2, wave)
+        entropy = ant.svd_entropy(wave)
         mobility, complexity = ant.hjorth_params(wave)
         katz = ant.katz_fd(wave)
-        IQR = iqr(wave)
-        print(entropy, markers[idx])
-        idx += 1
-        features.append([IQR, entropy, mobility, complexity, katz, mean, std, median, variance])
+        # IQR = iqr(wave)
+        features.append([mean, median, variance, std, entropy, mobility, complexity, katz])
     print('Making:', path_features)
     np.save(path_features, features)
     print('Making:', path_labels)
@@ -280,5 +278,5 @@ def wavelet_processing(data, markers, path_data):
 
 
 if __name__ == '__main__':
-    motor_imaginary()
     #TUARv2()
+    motor_imaginary()
