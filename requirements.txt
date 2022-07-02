@@ -1,9 +1,6 @@
 antropy
 flake8==3.9.2
 flask
-keras-nightly==2.9.0.dev2021122508
-keras-preprocessing==1.1.2
-keras
 mne-qt-browser==0.1.7
 mne
 numpy
@@ -28,17 +25,9 @@ scikit-image==0.19.0
 scikit-learn
 scipy
 setuptools==59.4.0
-spyder-kernels==2.1.3
-spyder==5.1.5
 statsmodels==0.13.1
 stochastic==0.6.0
-tb-nightly==2.8.0a20211225
-tensorboard-data-server==0.6.1
-tensorboard-plugin-wit==1.8.0
-tensorflow-io-gcs-filesystem==0.23.1
 textdistance==4.2.1
-tf-estimator-nightly==2.9.0.dev2021122509
-tf-nightly-gpu==2.9.0.dev20211225
 joblib
 gunicorn
 requests

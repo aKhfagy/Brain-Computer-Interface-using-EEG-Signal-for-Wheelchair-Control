@@ -2,12 +2,11 @@ import mne
 import sys
 import numpy as np
 import antropy as ant
+from scipy.stats import iqr
 import pywt
 from read_data_tuarv2 import ReadDataTUARv2, EDFDataTUARv2
 from read_data_motor_imaginary import ReadDataMotorImaginary
-from sklearn import preprocessing
 from Smooth import smooth
-from scipy.signal import savgol_filter
 
 PATH_TUARv2_C3_C4 = 'features.tuar/features_mean_std_c3_c4.npy'
 PATH_TUARv2_FP1_FP2 = 'features.tuar/features_mean_std_fp1_fp2.npy'
@@ -192,7 +191,7 @@ def segment_motor_data(data, labels, mapping, subject):
             elif cur != 0 and marker[i] not in labels:
                 for seg_i in range(0, len(temp) - 200, 200):
                     x = np.array(temp[seg_i: seg_i + 200])
-                    x = smooth(x)
+                    x = smooth(x, mapping[cur])
                     data_seg.append(x)
                     markers.append(mapping[cur])
                 temp = []
@@ -202,7 +201,7 @@ def segment_motor_data(data, labels, mapping, subject):
             elif cur != 0 and marker[i] != cur and marker[i] in labels:
                 for seg_i in range(0, len(temp) - 200, 200):
                     x = np.array(temp[seg_i: seg_i + 200])
-                    x = smooth(x)
+                    x = smooth(x, mapping[cur])
                     data_seg.append(x)
                     markers.append(mapping[cur])
                 temp = []
@@ -212,19 +211,43 @@ def segment_motor_data(data, labels, mapping, subject):
         if cur != 0:
             for seg_i in range(0, len(temp) - 200, 200):
                 x = np.array(temp[seg_i: seg_i + 200])
-                x = smooth(x)
+                x = smooth(x, mapping[cur])
                 data_seg.append(x)
                 markers.append(mapping[cur])
 
-    get_features_motor_dataset(data_seg, markers, set_labels=labels,
+    get_features_motor_dataset(data_seg, markers,
                                path_features='features.motor_dataset/data_features' + subject + '.npy',
-                               path_labels='features.motor_dataset/data_labels' + subject + '.npy',
-                               path_set_labels='features.motor_dataset/data_set_labels' + subject + '.npy')
+                               path_labels='features.motor_dataset/data_labels' + subject + '.npy')
 
-    wavelet_processing(data_seg, markers, path_data='features.motor_dataset/data_wavelet' + subject + '.npy')
+    # wavelet_processing(data_seg, markers, path_data='features.motor_dataset/data_wavelet' + subject + '.npy')
 
 
-def get_features_motor_dataset(data, markers, set_labels, path_features, path_labels, path_set_labels):
+def x_log2_x(x):
+    """ Return x * log2(x) and 0 if x is 0."""
+    results = x * np.log2(x)
+    if np.size(x) == 1:
+        if np.isclose(x, 0.0):
+            results = 0.0
+    else:
+        results[np.isclose(x, 0.0)] = 0.0
+    return results
+
+
+def renyi_entropy(alpha, X):
+    if np.isinf(alpha):
+        # XXX Min entropy!
+        return - np.log2(np.max(X))
+    elif np.isclose(alpha, 0):
+        # XXX Max entropy!
+        return np.log2(len(X))
+    elif np.isclose(alpha, 1):
+        # XXX Shannon entropy!
+        return - np.sum(x_log2_x(X))
+    else:
+        return (1.0 / (1.0 - alpha)) * np.log2(np.sum(X ** alpha))
+
+
+def get_features_motor_dataset(data, markers, path_features, path_labels):
     print('Processing for:', path_features)
     features = []
     for wave in data:
@@ -232,24 +255,28 @@ def get_features_motor_dataset(data, markers, set_labels, path_features, path_la
         std = np.std(wave)
         median = np.median(wave)
         variance = np.var(wave)
-        entropy = ant.svd_entropy(wave, normalize=True)
+        #entropy = renyi_entropy(2, wave)
+        entropy = ant.svd_entropy(wave)
         mobility, complexity = ant.hjorth_params(wave)
         katz = ant.katz_fd(wave)
+        # IQR = iqr(wave)
         features.append([mean, median, variance, std, entropy, mobility, complexity, katz])
     print('Making:', path_features)
     np.save(path_features, features)
     print('Making:', path_labels)
     np.save(path_labels, markers)
-    print('Making:', path_set_labels)
-    np.save(path_set_labels, set_labels)
 
 
 def wavelet_processing(data, markers, path_data):
     print('Making:', path_data)
     w = pywt.Wavelet('db1')
-    levels = pywt.dwt_max_level(data_len=200, filter_len=w.dec_len)
-    wavelet = []
+    features = []
     for wave in data:
-        coefficient = pywt.wavedec(wave, 'db1', level=levels)
-        wavelet.append(coefficient)
+        levels = pywt.dwt_max_level(data_len=len(wave), filter_len=w.dec_len)
+        wavelet = pywt.wavedec(wave, 'db1', level=levels)
+        features.append(wavelet)
 
+
+if __name__ == '__main__':
+    #TUARv2()
+    motor_imaginary()
