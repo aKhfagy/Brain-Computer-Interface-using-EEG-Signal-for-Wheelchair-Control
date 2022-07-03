@@ -1,39 +1,39 @@
-from flask import Flask, jsonify, request
 import requests
-import numpy as np
-from joblib import load
 import time
 import MDD10A as HBridge
 
 
 if __name__ == '__main__':
-    url = "http://192.168.1.10:5000/get_chosen_model"
-
     try:
-        response = requests.get(url)
-        model = response.json()
-        model_name = model['model']
-
-        model = load('models.cla/' + model_name + '.joblib')
-        data = np.load('features.motor_dataset/data_features' + model_name[0] + '.npy')
-        predictions = model.predict(data)
+        
+        predictions = [2, 2, 2, 3, 3, 3, 3, 1, 2, 3, 3, 3, 3, 3, 3, 3, 2, 2, 2]
+        
         for prediction in predictions:
-            url = "http://192.168.1.10:5000/direct_chair?prediction=" + str(prediction)
+            url = "http://192.168.1.7:5000/direct_chair?prediction=" + str(prediction)
             requests.get(url)
-
-            if prediction == 0:
+            url = "http://192.168.1.7:5000/get_movement"
+            response = requests.get(url)
+            print(response.json())
+            direction = response.json()
+            status = direction['Status']
+            if status == 'Validating':
+                time.sleep(60)
+                continue
+            
+            direction = direction['Direction']
+            if prediction == 'right':
                 # right
                 HBridge.setMotorLeft(1)
                 HBridge.setMotorRight(-1)
-            elif prediction == 1:
+            elif prediction == 'left':
                 # left
                 HBridge.setMotorLeft(-1)
                 HBridge.setMotorRight(1)
-            elif prediction == 3:
+            elif prediction == 'forward':
                 # forward
                 HBridge.setMotorLeft(1)
                 HBridge.setMotorRight(1)
-            elif prediction == 5:
+            elif prediction == 'backward':
                 # backwards
                 HBridge.setMotorLeft(-1)
                 HBridge.setMotorRight(-1)
@@ -42,6 +42,7 @@ if __name__ == '__main__':
                 HBridge.setMotorLeft(0)
                 HBridge.setMotorRight(0)
 
-            time.sleep(10)
+            time.sleep(60)
     except requests.exceptions.ConnectionError:
         print('Connection Failed')
+
