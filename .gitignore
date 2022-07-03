@@ -8,4 +8,7 @@ checkpoint/
 features.motor_dataset/
 models.tuar/
 models.cla/
+models.eyetracker/
+images.eyes/
+MobileApp/
 *.log

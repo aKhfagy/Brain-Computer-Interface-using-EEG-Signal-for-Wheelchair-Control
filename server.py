@@ -1,22 +1,23 @@
+from statistics import mode
 import traceback
 import logging
 
+import cv2
 import numpy as np
 from flask import Flask, jsonify, request
 from joblib import load
+import os as os
+import werkzeug
 from PIL import Image
 import requests as requests
 from io import BytesIO
 import tensorflow as tf
-#import MDD10A as HBridge
 
-from APIHelperFunctions import choose_model_by_name, get_data, rmse
+
+from APIHelperFunctions import choose_model_by_name, get_data, rmse, create_model
 from datasetreading import motor_imaginary
 
 app = Flask(__name__)
-
-MODELS = ['KNN', 'RF', 'MLP', 'SVM']
-SUBJECTS = ['A', 'B', 'C', 'D', 'E', 'F']
 
 logging.basicConfig(filename='predictions.log', level=logging.INFO)
 
@@ -24,8 +25,12 @@ terminating_string = '*!%)#!'
 
 current_string = ''
 
+
 @app.route("/")
 def home():
+    MODELS = ['KNN', 'RF', 'MLP', 'SVM']
+    SUBJECTS = ['A', 'B', 'C', 'D', 'E', 'F']
+
     return jsonify({
         'Models': MODELS,
         'Subjects': SUBJECTS,
@@ -98,6 +103,8 @@ def make_model():
 @app.route('/preprocessing')
 def preprocessing():
     motor_imaginary()
+    MODELS = ['KNN', 'RF', 'MLP', 'SVM']
+    SUBJECTS = ['A', 'B', 'C', 'D', 'E', 'F']
 
     return jsonify({
         'Finished preprocessing': 'Made features for CLA data',
@@ -110,6 +117,9 @@ def preprocessing():
 def view_model():
     subject = request.args.get('subject', default=None, type=str)
     model_name = request.args.get('model', default=None, type=str)
+
+    MODELS = ['KNN', 'RF', 'MLP', 'SVM']
+    SUBJECTS = ['A', 'B', 'C', 'D', 'E', 'F']
 
     if subject is None or model_name is None or subject not in SUBJECTS or model_name not in MODELS:
         return jsonify({
@@ -130,28 +140,44 @@ def view_model():
     })
 
 
-@app.route('/predict_eye_movement')
+@app.route('/predict_eye_movement', methods=['GET', 'POST'])
 def predict_eye_movement():
-    url = request.args.get('url', default=None, type=str)
+    if request.method == 'POST':
 
-    if url is None:
+        # labels:
+        # close: 0, forward: 1, left: 2, right: 3
+
+        if len(request.files) != 1:
+            return jsonify({
+                'ERROR': 'Wrong number of files'
+            })
+        file = request.files['pic']
+        app.logger.info("Image recieved data type: " + str(type(file)))
+        image_name = werkzeug.utils.secure_filename(file.filename)
+        image_path = 'images.eyes/' + image_name
+        file.save(image_path)
+        file = cv2.imread(image_path)
+        image = cv2.resize(file, (94, 94))
+        norm = (image - np.mean(image)) / np.std(image)
+
+        x = np.array(norm).reshape(-1, 94, 94, 3)
+        x = x.astype('float32')
+
+        model = create_model()
+        model.load_weights('./models.eyetracker/eye_tracker')
+        prediction = model.predict(x)
+
         return jsonify({
-            'Error': 'Please enter a valid path with all the attributes'
+            'Result': str(prediction[0])
         })
     else:
-        # response = requests.get(url)
-        # img = Image.open(BytesIO(response.content))
-        latest = tf.train.latest_checkpoint('checkpoint/cp.ckpt')
-        if latest is None:
-            return jsonify({
-                'Error': 'Failed to load checkpoint'
-            })
-        return latest
+        return jsonify({
+            'Result': 'Please use post request'
+        })
 
 
 @app.route('/get_movement')
 def get_movement():
-
     f = open('last_reading.txt', 'r')
     last_reading = int(f.readline())
     f.close()
@@ -177,7 +203,7 @@ def get_movement():
             'Status': 'Active',
             'Direction': direction
         })
-    
+
     logging.info('Displaying', direction, 'validating')
     return jsonify({
         'Status': 'Validating',
@@ -208,7 +234,7 @@ def direct_chair():
             counter += 1
         else:
             last_reading = prediction
-            counter = 1 
+            counter = 1
 
         f = open('last_reading.txt', 'w')
         f.write(str(last_reading))
@@ -217,32 +243,45 @@ def direct_chair():
         f = open('counter.txt', 'w')
         f.write(str(counter))
         f.close()
-            
+
         if counter >= 3:
             logging.info('Moving to', str(prediction))
-            
-            # if prediction == 0: # right )
-            #     # HBridge.setMotorLeft(1)
-            #     # HBridge.setMotorRight(-1)
-            # elif prediction == 1: # left !
-            #     # HBridge.setMotorLeft(-1)
-            #     # HBridge.setMotorRight(1)
-            # elif prediction == 3: # forward #
-            # #     HBridge.setMotorLeft(1)
-            # #     HBridge.setMotorRight(1)
-            # elif prediction == 5: # backwards %
-            #     # HBridge.setMotorLeft(-1)
-            #     # HBridge.setMotorRight(-1)
-            # else: # stop * 
-            #     # HBridge.setMotorLeft(0)
-            #     # HBridge.setMotorRight(0)
 
     return jsonify({
         'Prediction': str(prediction),
         'Counter': str(counter)
     })
-        
-            
+
+
+@app.route('/chose_model')
+def chose_model():
+    subject = request.args.get('subject', default=None, type=str)
+    model_name = request.args.get('model', default=None, type=str)
+
+    if subject is None or model_name is None:
+        return jsonify({
+            'Response': 'Please try again'
+        })
+
+    f = open('model-cla.txt', 'w')
+    f.write(subject + '-' + model_name + '.joblib')
+    f.close()
+
+    return jsonify({
+        'Response': 'successful'
+    })
+
+
+@app.route('/get_chosen_model')
+def get_chosen_model():
+    f = open('model-cla.txt', 'r')
+    model_name = f.readline()
+    f.close()
+
+    return jsonify({
+        'model': model_name
+    })
+
 
 if __name__ == '__main__':
     app.run(host="0.0.0.0", port=5000, debug=True)

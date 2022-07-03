@@ -6,6 +6,7 @@ from savedfiles import load_features_motor_dataset
 from joblib import dump
 from flask import jsonify
 import numpy as np
+import tensorflow as tf
 
 
 def choose_model_by_name(model_name, subject):
@@ -73,4 +74,27 @@ def rmse(y_hat, y):
     percentage = percentage / len(y_hat)
     error = np.sqrt(error)
     return percentage, error
+
+
+def create_model():
+    model = tf.keras.Sequential([
+        tf.keras.layers.Conv2D(filters=16, kernel_size=(3, 3), activation='relu', input_shape=(94, 94, 3)),
+        tf.keras.layers.MaxPooling2D(pool_size=(2, 2), strides=None, padding='valid'),
+        tf.keras.layers.Dropout(0.25),
+
+        tf.keras.layers.Conv2D(filters=16, kernel_size=(3, 3), activation='relu'),
+        tf.keras.layers.MaxPooling2D(pool_size=(2, 2), strides=None, padding='valid'),
+        tf.keras.layers.Dropout(0.25),
+
+        tf.keras.layers.Conv2D(filters=16, kernel_size=(3, 3), activation='relu'),
+        tf.keras.layers.MaxPooling2D(pool_size=(2, 2), strides=None, padding='valid'),
+        tf.keras.layers.Dropout(0.25),
+
+        tf.keras.layers.Flatten(),
+        tf.keras.layers.Dense(400, activation='relu'),
+        tf.keras.layers.Dropout(0.25),
+        tf.keras.layers.Dense(4, activation='softmax')
+    ])
+    model.compile(optimizer='adam', loss='categorical_crossentropy', metrics=['accuracy'])
+    return model
 
