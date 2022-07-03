@@ -12,7 +12,6 @@ from PIL import Image
 import requests as requests
 from io import BytesIO
 import tensorflow as tf
-# import MDD10A as HBridge
 
 
 from APIHelperFunctions import choose_model_by_name, get_data, rmse, create_model
@@ -248,29 +247,14 @@ def direct_chair():
         if counter >= 3:
             logging.info('Moving to', str(prediction))
 
-            # if prediction == 0: # right )
-            #     # HBridge.setMotorLeft(1)
-            #     # HBridge.setMotorRight(-1)
-            # elif prediction == 1: # left !
-            #     # HBridge.setMotorLeft(-1)
-            #     # HBridge.setMotorRight(1)
-            # elif prediction == 3: # forward #
-            # #     HBridge.setMotorLeft(1)
-            # #     HBridge.setMotorRight(1)
-            # elif prediction == 5: # backwards %
-            #     # HBridge.setMotorLeft(-1)
-            #     # HBridge.setMotorRight(-1)
-            # else: # stop * 
-            #     # HBridge.setMotorLeft(0)
-            #     # HBridge.setMotorRight(0)
-
     return jsonify({
         'Prediction': str(prediction),
         'Counter': str(counter)
     })
 
-@app.route('choose_model')
-def choose_model():
+
+@app.route('/chose_model')
+def chose_model():
     subject = request.args.get('subject', default=None, type=str)
     model_name = request.args.get('model', default=None, type=str)
 
@@ -288,10 +272,10 @@ def choose_model():
     })
 
 
-@app.route('get_choosen_model')
-def get_choosen_model():
-    f = open('model-cla', 'r')
-    model_name = int(f.readline())
+@app.route('/get_chosen_model')
+def get_chosen_model():
+    f = open('model-cla.txt', 'r')
+    model_name = f.readline()
     f.close()
 
     return jsonify({
