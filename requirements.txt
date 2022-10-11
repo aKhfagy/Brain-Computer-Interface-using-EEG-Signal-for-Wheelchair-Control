@@ -37,8 +37,6 @@ tensorboard-data-server==0.6.1
 tensorboard-plugin-wit==1.8.0
 tensorflow-io-gcs-filesystem==0.23.1
 textdistance==4.2.1
-tf-estimator-nightly==2.9.0.dev2021122509
-tf-nightly-gpu==2.9.0.dev20211225
 joblib
 gunicorn
 requests
